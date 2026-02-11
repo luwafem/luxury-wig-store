@@ -5,7 +5,7 @@ export const siteConfig = {
   
   // Business Information
   business: {
-    name: "LuxuryLocks Nigeria Limited",
+    name: "mamusca enterprise",
     address: "123 Victoria Island, Lagos, Nigeria",
     phone: "+234 812 345 6789",
     whatsapp: "+2348123456789",

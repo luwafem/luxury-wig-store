@@ -58,7 +58,7 @@ const Policies = () => {
       sections: [
         {
           title: 'Acceptance of Terms',
-          content: `By accessing and using LuxuryLocks Nigeria's website, you accept and agree to be bound by these Terms and Conditions. If you do not agree, please do not use our website.`
+          content: `By accessing and using mamusca Nigeria's website, you accept and agree to be bound by these Terms and Conditions. If you do not agree, please do not use our website.`
         },
         {
           title: 'Product Information',
@@ -177,7 +177,7 @@ Exchanges are subject to product availability.`
     <>
       <SEO 
         title={currentPolicy.title}
-        description={`Read our ${currentPolicy.title.toLowerCase()} for LuxuryLocks Nigeria.`}
+        description={`Read our ${currentPolicy.title.toLowerCase()} for mamusca Nigeria.`}
       />
       
       <div className="container mx-auto px-4 py-12">
@@ -217,7 +217,7 @@ Exchanges are subject to product availability.`
             <div className="p-8">
               <div className="prose prose-lg max-w-none">
                 <p className="text-gray-600 mb-8">
-                  Welcome to LuxuryLocks Nigeria. This policy outlines our practices regarding 
+                  Welcome to mamusca Nigeria. This policy outlines our practices regarding 
                   {activePolicy === 'privacy' && ' the collection, use, and protection of your personal information.'}
                   {activePolicy === 'terms' && ' your use of our website and services.'}
                   {activePolicy === 'refund' && ' our refund procedures and policies.'}

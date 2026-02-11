@@ -46,7 +46,7 @@ const Cart = ({ isOpen, onClose }) => {
             {/* Header: Editorial Style */}
             <div className="flex items-center justify-between p-8 border-b border-black/5">
               <div className="space-y-1">
-                <h2 className="text-2xl uppercase tracking-[0.3em] font-extralight">Le Panier</h2>
+                <h2 className="text-2xl uppercase tracking-[0.3em] font-extralight">cart</h2>
                 <p className="text-[10px] uppercase tracking-[0.4em] text-neutral-400">
                   {getCartCount()} {getCartCount() === 1 ? 'Selected Piece' : 'Selected Pieces'}
                 </p>
@@ -65,12 +65,12 @@ const Cart = ({ isOpen, onClose }) => {
             <div className="flex-1 overflow-y-auto px-8 py-4 custom-scrollbar">
               {cart.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center space-y-8">
-                  <p className="uppercase tracking-[0.5em] text-[11px] text-neutral-500 italic font-serif">Votre panier est vide</p>
+                  <p className="uppercase tracking-[0.5em] text-[11px] text-neutral-500 italic font-serif">cart is empty</p>
                   <button 
                     onClick={onClose}
                     className="text-[10px] uppercase tracking-[0.4em] border-b border-black pb-2 hover:text-neutral-500 hover:border-neutral-300 transition-all"
                   >
-                    Return to Maison
+                    Return to shop
                   </button>
                 </div>
               ) : (
@@ -129,7 +129,7 @@ const Cart = ({ isOpen, onClose }) => {
                     <span className="text-sm tracking-widest">₦{subtotal.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between items-baseline">
-                    <span className="text-[10px] uppercase tracking-[0.4em] text-neutral-500">Expédition</span>
+                    <span className="text-[10px] uppercase tracking-[0.4em] text-neutral-500">shipping</span>
                     <span className="text-[10px] uppercase tracking-[0.2em]">
                       {shipping === 0 ? 'Complimentary' : `₦${shipping.toLocaleString()}`}
                     </span>
@@ -156,7 +156,7 @@ const Cart = ({ isOpen, onClose }) => {
 
                 {/* Secure Badge */}
                 <p className="text-[9px] text-center uppercase tracking-[0.3em] text-neutral-400 pt-4">
-                  Secured by Maison Paystack
+                  Secured by Paystack
                 </p>
               </div>
             )}

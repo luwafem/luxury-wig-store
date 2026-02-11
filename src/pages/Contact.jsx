@@ -37,14 +37,14 @@ const Contact = () => {
   return (
     <div className="bg-white text-black antialiased min-h-screen">
       <SEO 
-        title="Concierge — LuxuryLocks Nigeria" 
+        title="Mamusca" 
         description="Contact our specialists for bespoke orders and private consultations."
       />
       
       {/* Editorial Header */}
       <header className="py-16 md:py-24 border-b border-black/5 text-center">
-        <span className="block uppercase tracking-[0.6em] text-[10px] mb-4 text-neutral-400">Le Contact</span>
-        <h1 className="text-4xl md:text-6xl uppercase tracking-tighter font-light leading-none">The Private Suite</h1>
+        <span className="block uppercase tracking-[0.6em] text-[10px] mb-4 text-neutral-400">Contact Us</span>
+        <h1 className="text-4xl md:text-6xl uppercase tracking-tighter font-light leading-none">customer service</h1>
       </header>
 
       <div className="container mx-auto px-6 py-12 md:py-24">
@@ -72,7 +72,7 @@ const Contact = () => {
               </section>
 
               <section className="pt-12 border-t border-black/5">
-                <h3 className="text-[10px] uppercase tracking-[0.5em] font-bold mb-8 text-neutral-400">The Studio</h3>
+                <h3 className="text-[10px] uppercase tracking-[0.5em] font-bold mb-8 text-neutral-400">Our Store</h3>
                 <p className="text-[11px] uppercase tracking-[0.2em] leading-loose text-neutral-600 mb-6">
                   {siteConfig.business.address}
                 </p>
@@ -83,7 +83,7 @@ const Contact = () => {
               </section>
 
               <section className="pt-12 border-t border-black/5">
-                <h3 className="text-[10px] uppercase tracking-[0.5em] font-bold mb-8 text-neutral-400">Maison Social</h3>
+                <h3 className="text-[10px] uppercase tracking-[0.5em] font-bold mb-8 text-neutral-400">Mamusca</h3>
                 <div className="flex gap-6">
                   {['instagram', 'facebook', 'twitter'].map((platform) => (
                     <a 
@@ -203,7 +203,7 @@ const Contact = () => {
               <div className="mt-20 p-10 border border-black/5 bg-[#f9f9f9] grayscale">
                 <h4 className="text-[10px] uppercase tracking-[0.4em] font-bold mb-4 flex items-center">
                   <span className="w-4 h-[1px] bg-black mr-3"></span>
-                  Custom Atelier
+                  Custom wigs
                 </h4>
                 <p className="text-[10px] uppercase tracking-[0.2em] leading-loose text-neutral-500">
                   Our artisans specialize in bespoke tailoring. For custom density, rare textures, or specific color matching, please provide detailed specifications. A specialist will be assigned to your request.

@@ -56,7 +56,7 @@ const Shop = () => {
 
   return (
     <div className="bg-white text-black antialiased min-h-screen">
-      <SEO title="The Collection | L'Art de la Coiffure" />
+      <SEO title="Mamusca" />
 
       {/* Minimalist Header */}
       <header className="pt-32 pb-16 border-b border-black/5">

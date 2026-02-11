@@ -1,6 +1,6 @@
 export const siteConfig = {
   // Brand Information
-  brandName: "LuxuryLocks Nigeria",
+  brandName: "mamusca",
   brandTagline: "Premium Human Hair Wigs & Extensions",
   
   // Business Information
@@ -9,7 +9,7 @@ export const siteConfig = {
     address: "123 Victoria Island, Lagos, Nigeria",
     phone: "+234 812 345 6789",
     whatsapp: "+2348123456789",
-    email: "info@luxurylocks.ng",
+    email: "info@mamusca.ng",
     workingHours: "Mon - Sat: 9AM - 6PM",
   },
   
@@ -23,9 +23,9 @@ export const siteConfig = {
   
   // Social Media
   social: {
-    instagram: "https://instagram.com/luxurylocksng",
-    facebook: "https://facebook.com/luxurylocksng",
-    twitter: "https://twitter.com/luxurylocksng",
+    instagram: "https://instagram.com/mamusca",
+    facebook: "https://facebook.com/mamusca",
+    twitter: "https://twitter.com/mamusca",
     whatsapp: "https://wa.me/2348123456789",
   },
   
@@ -47,10 +47,10 @@ export const siteConfig = {
   
   // SEO Defaults
   seo: {
-    title: "LuxuryLocks Nigeria | Premium Human Hair Wigs & Extensions",
+    title: "mamusca Nigeria | Premium Human Hair Wigs & Extensions",
     description: "Shop premium 100% human hair wigs, closures, frontals, and extensions. Free delivery in Lagos. Best prices in Nigeria.",
     keywords: "human hair wigs Nigeria, lace front wigs, hair extensions, closure, frontal, Nigerian wig store",
     ogImage: "/images/og-image.jpg",
-    twitterHandle: "@luxurylocksng",
+    twitterHandle: "@mamusca",
   }
 };

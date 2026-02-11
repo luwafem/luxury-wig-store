@@ -19,9 +19,9 @@ const Header = () => {
   }, []);
 
   const navLinks = [
-    { path: '/shop', label: 'Collection' },
-    { path: '/about', label: 'Editorial' },
-    { path: '/contact', label: 'Bespoke' },
+    { path: '/shop', label: 'shop' },
+    { path: '/about', label: 'about' },
+    { path: '/contact', label: 'contact' },
   ];
 
   return (
@@ -47,10 +47,10 @@ const Header = () => {
               </h1>
               <div className="overflow-hidden h-[10px]">
                 <span className="block text-[7px] uppercase tracking-[0.7em] text-neutral-400 transition-transform duration-500 group-hover:-translate-y-full">
-                  Maison de Luxe
+                  enterprise
                 </span>
                 <span className="block text-[7px] uppercase tracking-[0.7em] text-black transition-transform duration-500 group-hover:-translate-y-full italic font-serif">
-                  Est. 2026
+                  nigeria
                 </span>
               </div>
             </motion.div>
@@ -90,7 +90,7 @@ const Header = () => {
               className="group flex items-center gap-3"
             >
               <span className="text-[9px] uppercase tracking-[0.3em] text-neutral-400 group-hover:text-black transition-colors hidden sm:block">
-                Le Panier
+                cart
               </span>
               <div className="relative border border-black/10 px-2 py-1 group-hover:border-black transition-colors">
                  <span className="text-[10px] font-light">
@@ -130,7 +130,7 @@ const Header = () => {
               className="fixed inset-0 bg-white z-[60] flex flex-col"
             >
               <div className="flex justify-between items-center px-6 py-8 border-b border-black/5">
-                <span className="text-[10px] uppercase tracking-widest font-light text-neutral-400">Navigation</span>
+                <span className="text-[10px] uppercase tracking-widest font-light text-neutral-400">mamusca</span>
                 <button 
                   onClick={() => setIsMenuOpen(false)}
                   className="text-[10px] uppercase tracking-[0.3em] font-medium"
@@ -162,7 +162,7 @@ const Header = () => {
               </div>
 
               <div className="p-12 border-t border-black/5 flex flex-col space-y-4">
-                <p className="text-[9px] uppercase tracking-[0.4em] text-neutral-400">Digital Concierge</p>
+                <p className="text-[9px] uppercase tracking-[0.4em] text-neutral-400">reach out to us</p>
                 <a href={`https://wa.me/${siteConfig.business.whatsapp}`} className="text-xs uppercase tracking-widest">
                   {siteConfig.business.phone}
                 </a>

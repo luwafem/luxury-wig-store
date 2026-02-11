@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }) => {
   const checkAdminStatus = async (currentUser) => {
     try {
       // Check email pattern first (quick check)
-      const emailIsAdmin = currentUser.email?.endsWith('@luxurylocks.ng') || 
+      const emailIsAdmin = currentUser.email?.endsWith('@mamusca.ng') || 
                           currentUser.email === process.env.REACT_APP_ADMIN_EMAIL;
       
       // Fetch user document to check admin field

@@ -14,7 +14,7 @@ export const whatsappService = {
   },
   
   sendSupportMessage() {
-    const message = `Hello LuxuryLocks Nigeria! I need assistance with:`;
+    const message = `Hello mamusca Nigeria! I need assistance with:`;
     const encodedMessage = encodeURIComponent(message);
     return `https://wa.me/${siteConfig.business.whatsapp}?text=${encodedMessage}`;
   },

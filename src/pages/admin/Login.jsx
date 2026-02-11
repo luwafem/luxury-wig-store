@@ -42,7 +42,7 @@ const AdminLogin = () => {
             Admin Login
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            LuxuryLocks Nigeria Admin Portal
+            mamusca Nigeria Admin Portal
           </p>
         </div>
         
@@ -54,7 +54,7 @@ const AdminLogin = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              placeholder="admin@luxurylocks.ng"
+              placeholder="admin@mamusca.ng"
               className="rounded-t-md"
             />
             <Input

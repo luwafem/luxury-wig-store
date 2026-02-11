@@ -31,7 +31,7 @@ const CheckoutForm = ({ onSubmit, loading }) => {
         <section>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
             <Input
-              label="Nom Complet"
+              label="Full Name"
               {...register('fullName', { required: 'Full name is required' })}
               error={errors.fullName?.message}
               placeholder="JEAN DOE"
@@ -48,7 +48,7 @@ const CheckoutForm = ({ onSubmit, loading }) => {
             />
 
             <Input
-              label="Téléphone"
+              label="Telephone"
               type="tel"
               {...register('phone', { required: 'Required' })}
               error={errors.phone?.message}
@@ -63,7 +63,7 @@ const CheckoutForm = ({ onSubmit, loading }) => {
           <h3 className="text-[10px] uppercase tracking-[0.4em] font-bold mb-10 text-neutral-400">02. Logistics</h3>
           <div className="space-y-10">
             <Input
-              label="Adresse de Livraison"
+              label="Address"
               {...register('address', { required: 'Address is required' })}
               error={errors.address?.message}
               placeholder="STREET, APARTMENT, SUITE"
@@ -77,7 +77,7 @@ const CheckoutForm = ({ onSubmit, loading }) => {
                   className="w-full border-b border-black rounded-none bg-transparent py-3 text-[11px] uppercase tracking-widest focus:outline-none appearance-none"
                   {...register('state', { required: 'State is required' })}
                 >
-                  <option value="">Sélectionner</option>
+                  <option value="">Select</option>
                   {nigerianStates.map(state => (
                     <option key={state} value={state}>{state.toUpperCase()}</option>
                   ))}
@@ -150,7 +150,7 @@ const CheckoutForm = ({ onSubmit, loading }) => {
             loading={loading}
             className="w-full py-6 bg-black text-white rounded-none uppercase tracking-[0.4em] text-[11px] transition-all hover:bg-neutral-900 active:scale-[0.99]"
           >
-            Continuer au Paiement
+            Continue to payment
           </Button>
         </div>
       </form>

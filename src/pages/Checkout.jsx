@@ -83,7 +83,7 @@ const Checkout = () => {
       
       {/* Editorial Header */}
       <header className="py-12 md:py-20 border-b border-black/5 text-center">
-        <span className="block uppercase tracking-[0.6em] text-[10px] mb-4 text-neutral-400">La Finalisation</span>
+        <span className="block uppercase tracking-[0.6em] text-[10px] mb-4 text-neutral-400"></span>
         <h1 className="text-4xl md:text-5xl uppercase tracking-tighter font-light leading-none">Checkout</h1>
       </header>
 
@@ -157,7 +157,7 @@ const Checkout = () => {
       {/* Footer Branding */}
       <footer className="py-20 border-t border-black/5 text-center">
         <div className="w-10 h-[1px] bg-black mx-auto mb-8"></div>
-        <p className="text-[9px] uppercase tracking-[0.6em] text-neutral-400">Maison de Beauté — Lagos</p>
+        <p className="text-[9px] uppercase tracking-[0.6em] text-neutral-400">mamusca enterprise</p>
       </footer>
     </div>
   );

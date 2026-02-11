@@ -52,10 +52,10 @@ const Home = () => {
             transition={{ duration: 1.5 }}
           >
             <span className="block uppercase tracking-[0.6em] text-[10px] md:text-xs mb-6 font-sans font-medium text-white">
-              Spring-Summer 2026
+              Luxury wigs. Precision made.
             </span>
             <h1 className="text-5xl md:text-8xl font-light uppercase tracking-tighter leading-none mb-10 text-white">
-              L'Art de <br /> la Coiffure
+              Crafted for<br /> Queens
             </h1>
             <Link to="/shop">
               <button className="px-10 py-4 bg-white text-black uppercase tracking-[0.3em] text-[10px] hover:bg-neutral-800 transition-all duration-500">
@@ -67,13 +67,13 @@ const Home = () => {
       </section>
 
       {/* House Values: Hairline Borders for Mobile */}
-      <section className="bg-white border-b border-black">
+      <section className="bg-white border-b ">
         <div className="container mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-black">
+          <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x ">
             {[
-              { label: "The Delivery", desc: "Complimentary over ₦50,000" },
               { label: "The Quality", desc: "100% Virgin Selection" },
-              { label: "The Promise", desc: "Twelve Month Guarantee" }
+              { label: "The Promise", desc: "Twelve Month Guarantee" },
+              { label: "The Delivery", desc: "Complimentary over ₦500000" }
             ].map((item, i) => (
               <div key={i} className="py-10 text-center flex flex-col items-center justify-center px-4">
                 <h3 className="uppercase tracking-[0.4em] text-[11px] font-bold mb-2">{item.label}</h3>
@@ -88,7 +88,7 @@ const Home = () => {
       <section className="py-20 md:py-32">
         <div className="container mx-auto px-4">
           <div className="flex flex-col items-center mb-16 md:mb-24">
-            <h2 className="text-2xl md:text-4xl uppercase tracking-[0.3em] font-light mb-4">The Selection</h2>
+            <h2 className="text-2xl md:text-4xl uppercase tracking-[0.3em] font-light mb-4">Featured wigs</h2>
             <div className="w-10 h-[1px] bg-black"></div>
           </div>
           
@@ -111,9 +111,12 @@ const Home = () => {
       </section>
 
       {/* Best Sellers: Contrast Section */}
-      <section className="py-20 bg-[#f9f9f9]">
+      <section className="py-20 ">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-xl md:text-3xl uppercase tracking-[0.4em] mb-12 italic font-serif">Les Iconiques</h2>
+          <div className="flex flex-col items-center mb-16 md:mb-24">
+            <h2 className="text-2xl md:text-4xl uppercase tracking-[0.3em] font-light mb-4">Best Seller</h2>
+            <div className="w-10 h-[1px] bg-black"></div>
+          </div>
           <ProductGrid products={bestSellers} showFilters={false} />
         </div>
       </section>
@@ -121,7 +124,7 @@ const Home = () => {
       {/* Boutique CTA: Ultra Minimal */}
       <section className="py-24 md:py-40 bg-white border-t border-black/5">
         <div className="container mx-auto px-6 text-center">
-          <h2 className="text-2xl md:text-4xl uppercase tracking-[0.4em] mb-8 font-extralight">The Private Suite</h2>
+          <h2 className="text-2xl md:text-4xl uppercase tracking-[0.4em] mb-8 font-extralight">ORDER CUSTOM WIG</h2>
           <p className="max-w-md mx-auto text-[10px] md:text-xs uppercase tracking-[0.25em] leading-[2.5] text-neutral-500 mb-12">
             Experience personalized luxury. Our specialists are available for digital consultations and bespoke requests.
           </p>
@@ -130,7 +133,7 @@ const Home = () => {
               href={`https://wa.me/${siteConfig.business.whatsapp}`}
               className="w-full md:w-auto px-12 py-4 border border-black uppercase tracking-[0.3em] text-[10px] hover:bg-black hover:text-white transition-all duration-700"
             >
-              Contact a Specialist
+              Contact
             </a>
           </div>
         </div>

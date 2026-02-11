@@ -39,7 +39,7 @@ const Footer = () => {
                 {siteConfig.brandName}
               </h2>
               <p className="text-[10px] uppercase tracking-[0.5em] text-neutral-400 mt-2">
-                Lagos — London
+                enterprise
               </p>
             </Link>
             <p className="text-sm font-light leading-relaxed text-neutral-500 max-w-sm">

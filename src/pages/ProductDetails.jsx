@@ -229,7 +229,7 @@ const ProductDetails = () => {
                 disabled={safeProduct.stockQuantity === 0}
                 className="w-full h-14 bg-black text-white text-[10px] uppercase tracking-[0.4em] hover:bg-neutral-800 transition-all duration-700 disabled:bg-neutral-200"
               >
-                {safeProduct.stockQuantity === 0 ? 'Selection Unavailable' : 'Add to Collection'}
+                {safeProduct.stockQuantity === 0 ? 'Selection Unavailable' : 'Add to cart'}
               </button>
 
               <a
@@ -238,12 +238,12 @@ const ProductDetails = () => {
                 rel="noopener noreferrer"
                 className="flex items-center justify-center w-full h-14 border border-black text-[10px] uppercase tracking-[0.4em] hover:bg-black hover:text-white transition-all duration-700"
               >
-                Inquire via Specialist
+                Inquire via whatapp
               </a>
             </div>
 
             <div className="pt-10 border-t border-black/10">
-              <h3 className="text-[10px] uppercase tracking-[0.5em] font-bold mb-6">The Narrative</h3>
+              <h3 className="text-[10px] uppercase tracking-[0.5em] font-bold mb-6">descrition</h3>
               <div className="text-[11px] leading-[2] text-neutral-500 uppercase tracking-widest space-y-4">
                 {safeProduct.description ? (
                   safeProduct.description.split('\n').map((paragraph, index) => (

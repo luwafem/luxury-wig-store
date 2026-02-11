@@ -67,10 +67,10 @@ const Shop = () => {
             className="flex flex-col items-center text-center"
           >
             <span className="uppercase tracking-[0.6em] text-[10px] mb-4 text-neutral-500">
-              Browse the Archive
+              
             </span>
             <h1 className="text-4xl md:text-6xl font-light uppercase tracking-tighter mb-12">
-              The Collection
+             wig shop
             </h1>
             
             {/* Elegant Search Bar */}

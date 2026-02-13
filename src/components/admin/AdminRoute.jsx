@@ -1,30 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { Navigate, useLocation, Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { authService } from '../../services/firebase';
-import LoadingSpinner from '../common/LoadingSpinner';
 
 const AdminRoute = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const location = useLocation();
   
-  // Function to scroll to sections (for dashboard pages)
   const scrollToSection = (sectionId) => {
     const element = document.getElementById(sectionId);
     if (element) {
-      // Account for both headers: main header (64px) + admin header (56px) + some padding
-      const offset = 120; 
+      // ⬆︎ Increased offset to account for both fixed headers
+      const offset = 180; 
       const elementPosition = element.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.pageYOffset - offset;
-      
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth'
-      });
+      window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
     }
   };
 
-  // Admin navigation items
   const adminNavItems = [
     { path: '/admin/', label: 'Dashboard', icon: '📊' },
     { path: '/admin/orders', label: 'Orders', icon: '📦' },
@@ -32,7 +26,6 @@ const AdminRoute = ({ children }) => {
     { path: '/admin/promo-codes', label: 'Promo Codes', icon: '🎟️' },
   ];
 
-  // Dashboard navigation items (only for dashboard page)
   const dashboardNavItems = [
     { id: 'stats', label: 'Stats Overview', icon: '📊' },
     { id: 'recent-orders', label: 'Recent Orders', icon: '📦' },
@@ -46,16 +39,8 @@ const AdminRoute = ({ children }) => {
 
   const checkAuth = async () => {
     try {
-      // Check if user is logged in via Firebase
       const user = authService.getCurrentUser();
-      
-      if (user) {
-        // You can add additional admin role checks here
-        // For now, any authenticated user can access admin
-        setIsAuthenticated(true);
-      } else {
-        setIsAuthenticated(false);
-      }
+      setIsAuthenticated(!!user);
     } catch (error) {
       console.error('Auth check error:', error);
       setIsAuthenticated(false);
@@ -75,119 +60,126 @@ const AdminRoute = ({ children }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner size="lg" />
+      <div className="min-h-screen bg-black flex justify-center items-center">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+          className="w-8 h-8 border border-pink-500/30 border-t-pink-500 rounded-full"
+        />
       </div>
     );
   }
 
   if (!isAuthenticated) {
-    // Redirect to login page
     return <Navigate to="/admin/login" state={{ from: location }} replace />;
   }
 
   const isDashboardPage = location.pathname === '/admin/dashboard';
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Main Admin Header - Fixed position */}
-      <header className="fixed top-16 left-0 right-0 z-40 bg-white border-b shadow-sm ">
-        <div className="px-6 py-3">
+    <div className="min-h-screen bg-black text-white antialiased">
+      {/* Fixed Admin Header – Noir */}
+      {/* ⬇︎ Now sits below main website header (top-0 → top-[96px]) */}
+      <header className="fixed top-[96px] left-0 right-0 z-40 bg-black/90 backdrop-blur-xl border-b border-white/5">
+        <div className="px-6 py-4">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
-            {/* Left side: Page title and admin navigation */}
-            <div className="flex items-center space-x-4">
-              <h1 className="text-lg md:text-xl font-bold text-gray-900">
-                Admin Panel
+            
+            {/* Left: Brand & Navigation */}
+            <div className="flex items-center space-x-6">
+              <h1 className="text-base md:text-lg uppercase tracking-[0.4em] font-light text-white">
+                Atelier<span className="italic font-serif text-pink-300 lowercase tracking-normal ml-1">.</span>
               </h1>
-              <span className="hidden md:inline text-gray-400">|</span>
               
-              {/* Admin Navigation Links */}
-              <div className="hidden md:flex items-center space-x-4">
+              <span className="hidden md:inline text-white/10">|</span>
+              
+              {/* Desktop Navigation */}
+              <div className="hidden md:flex items-center space-x-6">
                 {adminNavItems.map((item) => (
                   <Link
                     key={item.path}
                     to={item.path}
-                    className={`flex items-center space-x-1 text-sm font-medium transition-colors ${
+                    className={`text-[10px] uppercase tracking-[0.3em] transition-colors duration-300 border-b ${
                       location.pathname === item.path
-                        ? 'text-primary-600'
-                        : 'text-gray-600 hover:text-primary-600'
+                        ? 'border-pink-400 text-white'
+                        : 'border-transparent text-neutral-500 hover:text-white hover:border-pink-400/50'
                     }`}
                   >
-                    <span>{item.icon}</span>
-                    <span>{item.label}</span>
+                    <span className="mr-2 text-sm">{item.icon}</span>
+                    {item.label}
                   </Link>
                 ))}
               </div>
             </div>
-            
-            {/* Right side: Date and user actions */}
-            <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
-              <div className="text-xs text-gray-500">
+
+            {/* Right: Date & Actions */}
+            <div className="flex items-center gap-6">
+              <span className="hidden md:block text-[9px] uppercase tracking-[0.4em] text-neutral-500">
                 {new Date().toLocaleDateString('en-NG', {
-                  weekday: 'long',
+                  weekday: 'short',
                   year: 'numeric',
-                  month: 'long',
+                  month: 'short',
                   day: 'numeric',
                 })}
-              </div>
+              </span>
               
-              <div className="flex items-center space-x-3">
-                <button
-                  onClick={() => window.location.href = '/'}
-                  className="text-sm text-gray-600 hover:text-primary-600 font-medium"
+              <div className="flex items-center gap-4">
+                <Link
+                  to="/"
+                  className="text-[9px] uppercase tracking-[0.3em] text-neutral-500 hover:text-white transition-colors border-b border-transparent hover:border-pink-400 pb-0.5"
                 >
                   View Site
-                </button>
+                </Link>
                 
                 <button
                   onClick={handleLogout}
-                  className="text-sm text-red-600 hover:text-red-800 font-medium"
+                  className="text-[9px] uppercase tracking-[0.3em] text-neutral-500 hover:text-pink-400 transition-colors border-b border-transparent hover:border-pink-400 pb-0.5"
                 >
                   Logout
                 </button>
               </div>
             </div>
           </div>
-          
-          {/* Mobile Admin Navigation */}
-          <div className="mt-2 md:hidden">
-            <div className="flex overflow-x-auto space-x-4 pb-1 scrollbar-hide">
+
+          {/* Mobile Navigation */}
+          <div className="mt-3 md:hidden overflow-x-auto pb-1 scrollbar-hide">
+            <div className="flex items-center space-x-6">
               {adminNavItems.map((item) => (
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`flex items-center space-x-1 text-xs font-medium whitespace-nowrap px-2 py-1 rounded ${
+                  className={`text-[9px] uppercase tracking-[0.3em] whitespace-nowrap transition-colors border-b ${
                     location.pathname === item.path
-                      ? 'bg-primary-50 text-primary-600'
-                      : 'text-gray-600 hover:bg-gray-100'
+                      ? 'border-pink-400 text-white'
+                      : 'border-transparent text-neutral-500 hover:text-white hover:border-pink-400/50'
                   }`}
                 >
-                  <span>{item.icon}</span>
-                  <span>{item.label}</span>
+                  <span className="mr-1 text-sm">{item.icon}</span>
+                  {item.label}
                 </Link>
               ))}
             </div>
           </div>
-          
-          {/* Dashboard-specific navigation (only on dashboard page) */}
+
+          {/* Dashboard Section Navigation – Minimal, Pink Underline */}
           {isDashboardPage && (
-            <div className="mt-3 pt-3 border-t">
+            <div className="mt-4 pt-4 border-t border-white/5">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
-                <div>
-                  <h2 className="text-md font-semibold text-gray-900">Dashboard Sections</h2>
-                </div>
+                <span className="text-[9px] uppercase tracking-[0.6em] text-pink-400/70">
+                  Dashboard Sections
+                </span>
                 
-                {/* Dashboard Navigation Tabs */}
                 <div className="flex overflow-x-auto pb-1 scrollbar-hide">
-                  <div className="flex space-x-1">
+                  <div className="flex items-center space-x-6">
                     {dashboardNavItems.map((item) => (
                       <button
                         key={item.id}
                         onClick={() => scrollToSection(item.id)}
-                        className="flex items-center space-x-1 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all duration-200 hover:bg-gray-100 active:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                        className="group flex items-center gap-1 text-[9px] uppercase tracking-[0.3em] text-neutral-500 hover:text-white transition-colors border-b border-transparent hover:border-pink-400 pb-0.5"
                       >
-                        <span className="text-sm">{item.icon}</span>
-                        <span>{item.label}</span>
+                        <span className="text-sm text-neutral-400 group-hover:text-pink-300 transition-colors">
+                          {item.icon}
+                        </span>
+                        {item.label}
                       </button>
                     ))}
                   </div>
@@ -198,8 +190,8 @@ const AdminRoute = ({ children }) => {
         </div>
       </header>
 
-      {/* Main content with padding to account for both headers */}
-      <main className="pt-32 pb-6 px-6">
+      {/* Main Content – Increased top padding to clear both headers */}
+      <main className="pt-56 pb-12 px-6">
         {children}
       </main>
     </div>

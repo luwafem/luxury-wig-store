@@ -1,25 +1,21 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 
-const LoadingSpinner = ({ size = 'md', color = 'primary', className = '' }) => {
+const LoadingSpinner = ({ size = 'md', className = '' }) => {
   const sizeClasses = {
-    xs: 'w-4 h-4 border-2',
-    sm: 'w-6 h-6 border-2',
-    md: 'w-8 h-8 border-3',
-    lg: 'w-12 h-12 border-4',
-    xl: 'w-16 h-16 border-4',
-  };
-
-  const colorClasses = {
-    primary: 'border-primary-600 border-t-transparent',
-    white: 'border-white border-t-transparent',
-    gray: 'border-gray-300 border-t-transparent',
-    black: 'border-gray-900 border-t-transparent',
+    xs: 'w-4 h-4 border',
+    sm: 'w-6 h-6 border',
+    md: 'w-8 h-8 border',
+    lg: 'w-12 h-12 border-2',
+    xl: 'w-16 h-16 border-2',
   };
 
   return (
     <div className={`flex justify-center items-center ${className}`}>
-      <div
-        className={`${sizeClasses[size]} ${colorClasses[color]} rounded-full animate-spin`}
+      <motion.div
+        animate={{ rotate: 360 }}
+        transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+        className={`${sizeClasses[size]} border-pink-500/30 border-t-pink-500 rounded-full`}
       />
     </div>
   );

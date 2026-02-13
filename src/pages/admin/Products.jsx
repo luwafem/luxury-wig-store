@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import AdminRoute from '../../components/admin/AdminRoute';
 import ProductForm from '../../components/admin/ProductForm';
-import Button from '../../components/common/Button';
 import { productService } from '../../services/firebase';
 
 const Products = () => {
@@ -55,12 +55,10 @@ const Products = () => {
 
   const handleFormSuccess = (updatedProduct) => {
     if (selectedProduct) {
-      // Update existing product in list
       setProducts(products.map(p => 
         p.id === updatedProduct.id ? updatedProduct : p
       ));
     } else {
-      // Add new product to list
       setProducts([updatedProduct, ...products]);
     }
     setShowForm(false);
@@ -70,8 +68,12 @@ const Products = () => {
   if (loading) {
     return (
       <AdminRoute>
-        <div className="flex justify-center items-center min-h-96">
-          <div className="w-12 h-12 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+        <div className="min-h-screen bg-black flex justify-center items-center">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+            className="w-8 h-8 border border-pink-500/30 border-t-pink-500 rounded-full"
+          />
         </div>
       </AdminRoute>
     );
@@ -79,36 +81,46 @@ const Products = () => {
 
   return (
     <AdminRoute>
-      <div className="p-6">
+      <div className="bg-black text-white antialiased min-h-screen p-6">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <header className="mb-12 border-b border-white/5 pb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
+            <span className="block uppercase tracking-[0.6em] text-[9px] mb-4 text-pink-400/70">
               {id ? (selectedProduct ? 'Edit Product' : 'Add Product') : 'Product Management'}
+            </span>
+            <h1 className="text-3xl md:text-4xl uppercase tracking-tighter font-light leading-none text-white">
+              {id ? (selectedProduct ? 'Edit Product' : 'Add Product') : 'Products'}
+              <span className="italic font-serif text-pink-300 lowercase tracking-normal ml-2">.</span>
             </h1>
-            <p className="text-gray-600">
+            <p className="text-[10px] uppercase tracking-[0.3em] text-neutral-400 mt-3">
               {id ? 'Update product details' : 'Manage your product catalog'}
             </p>
           </div>
           
           {!id && !showForm && (
-            <Button
-              variant="primary"
+            <button
               onClick={() => {
                 setShowForm(true);
                 setSelectedProduct(null);
               }}
+              className="group relative px-8 py-3 overflow-hidden border border-white text-[9px] uppercase tracking-[0.4em] text-white bg-transparent transition-all duration-700"
             >
-              + Add New Product
-            </Button>
+              <motion.div
+                className="absolute inset-0 w-0 bg-white transition-all duration-700 ease-out group-hover:w-full"
+                whileHover={{ width: '100%' }}
+              />
+              <span className="relative z-10 group-hover:text-black transition-colors duration-700">
+                + Add New Product
+              </span>
+            </button>
           )}
-        </div>
+        </header>
 
         {showForm || id ? (
           <div className="max-w-4xl mx-auto">
-            <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-bold text-gray-900">
+            <div className="border border-white/5 bg-black/80 backdrop-blur-sm p-8 mb-6">
+              <div className="flex justify-between items-center mb-8">
+                <h2 className="text-[11px] uppercase tracking-[0.5em] font-medium text-pink-300">
                   {selectedProduct ? 'Edit Product' : 'Add New Product'}
                 </h2>
                 <button
@@ -117,9 +129,15 @@ const Products = () => {
                     setSelectedProduct(null);
                     window.history.back();
                   }}
-                  className="text-gray-500 hover:text-gray-700"
+                  className="group relative px-4 py-2 overflow-hidden border border-white/20 text-[9px] uppercase tracking-[0.3em] text-neutral-400 bg-transparent transition-all duration-700 hover:border-white/40"
                 >
-                  Cancel
+                  <motion.div
+                    className="absolute inset-0 w-0 bg-white/10 transition-all duration-700 ease-out group-hover:w-full"
+                    whileHover={{ width: '100%' }}
+                  />
+                  <span className="relative z-10 group-hover:text-white transition-colors duration-700">
+                    Cancel
+                  </span>
                 </button>
               </div>
               
@@ -131,152 +149,193 @@ const Products = () => {
           </div>
         ) : (
           <>
-            {/* Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-              <div className="bg-white rounded-xl shadow p-6">
-                <p className="text-sm text-gray-600">Total Products</p>
-                <p className="text-2xl font-bold">{products.length}</p>
-              </div>
-              <div className="bg-white rounded-xl shadow p-6">
-                <p className="text-sm text-gray-600">In Stock</p>
-                <p className="text-2xl font-bold">
-                  {products.filter(p => p.stockQuantity > 0).length}
-                </p>
-              </div>
-              <div className="bg-white rounded-xl shadow p-6">
-                <p className="text-sm text-gray-600">Featured</p>
-                <p className="text-2xl font-bold">
-                  {products.filter(p => p.isFeatured).length}
-                </p>
-              </div>
-              <div className="bg-white rounded-xl shadow p-6">
-                <p className="text-sm text-gray-600">Low Stock (less than 10)</p>
-                <p className="text-2xl font-bold text-red-600">
-                  {products.filter(p => p.stockQuantity < 10).length}
-                </p>
-              </div>
+            {/* Stats – Noir Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-12">
+              {[
+                { label: 'Total Products', value: products.length, color: 'text-white' },
+                { label: 'In Stock', value: products.filter(p => p.stockQuantity > 0).length, color: 'text-white' },
+                { label: 'Featured', value: products.filter(p => p.isFeatured).length, color: 'text-white' },
+                { label: 'Low Stock (<10)', value: products.filter(p => p.stockQuantity < 10).length, color: 'text-red-400' }
+              ].map((stat, i) => (
+                <div
+                  key={i}
+                  className="bg-black/80 backdrop-blur-sm border border-white/5 p-6"
+                >
+                  <p className="text-[9px] uppercase tracking-[0.4em] text-neutral-500 mb-2">
+                    {stat.label}
+                  </p>
+                  <p className={`text-2xl font-light tracking-tight ${stat.color}`}>
+                    {stat.value}
+                  </p>
+                </div>
+              ))}
             </div>
 
             {/* Products Table */}
-            <div className="bg-white rounded-xl shadow overflow-hidden">
+            <div className="border border-white/5 bg-black/80 backdrop-blur-sm">
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-gray-50">
+                  <thead className="border-b border-white/5 bg-black/40">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-[9px] uppercase tracking-[0.3em] text-neutral-500 font-medium">
                         Product
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-[9px] uppercase tracking-[0.3em] text-neutral-500 font-medium">
                         Code
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-[9px] uppercase tracking-[0.3em] text-neutral-500 font-medium">
                         Price
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-[9px] uppercase tracking-[0.3em] text-neutral-500 font-medium">
                         Stock
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-[9px] uppercase tracking-[0.3em] text-neutral-500 font-medium">
                         Status
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-[9px] uppercase tracking-[0.3em] text-neutral-500 font-medium">
                         Actions
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {products.map((product) => (
-                      <tr key={product.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4">
-                          <div className="flex items-center">
-                            <div className="w-10 h-10 rounded-lg overflow-hidden bg-gray-100 mr-4">
-                              <img
-                                src={product.images?.[0]}
-                                alt={product.name}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                            <div>
-                              <p className="font-medium text-gray-900">{product.name}</p>
-                              <p className="text-sm text-gray-500 truncate max-w-xs">
-                                {product.shortDescription}
-                              </p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="font-mono text-sm bg-gray-100 px-2 py-1 rounded">
-                            {product.productCode}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="font-bold">
-                            ₦{product.price.toLocaleString()}
-                          </span>
-                          {product.originalPrice && (
-                            <p className="text-sm text-gray-500 line-through">
-                              ₦{product.originalPrice.toLocaleString()}
-                            </p>
-                          )}
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                            product.stockQuantity > 10 ? 'bg-green-100 text-green-800' :
-                            product.stockQuantity > 0 ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-red-100 text-red-800'
-                          }`}>
-                            {product.stockQuantity} units
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex flex-wrap gap-1">
-                            {product.isFeatured && (
-                              <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">
-                                Featured
-                              </span>
-                            )}
-                            {product.isBestSeller && (
-                              <span className="px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded">
-                                Best Seller
-                              </span>
-                            )}
-                            {product.isOnSale && (
-                              <span className="px-2 py-1 text-xs bg-red-100 text-red-800 rounded">
-                                Sale
-                              </span>
-                            )}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex space-x-2">
-                            <Link
-                              to={`/admin/products/${product.id}`}
-                              className="px-3 py-1 text-sm bg-primary-50 text-primary-700 rounded hover:bg-primary-100"
-                            >
-                              Edit
-                            </Link>
-                            <button
-                              onClick={() => handleDelete(product.id)}
-                              className="px-3 py-1 text-sm bg-red-50 text-red-700 rounded hover:bg-red-100"
-                            >
-                              Delete
-                            </button>
-                            <Link
-                              to={`/product/${product.id}`}
-                              target="_blank"
-                              className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
-                            >
-                              View
-                            </Link>
-                          </div>
+                  <tbody className="divide-y divide-white/5">
+                    {products.length === 0 ? (
+                      <tr>
+                        <td colSpan="6" className="px-6 py-12 text-center text-[10px] uppercase tracking-[0.3em] text-neutral-500">
+                          No products found.
                         </td>
                       </tr>
-                    ))}
+                    ) : (
+                      products.map((product) => {
+                        const stockStatus = 
+                          product.stockQuantity > 10 ? 'text-green-400' :
+                          product.stockQuantity > 0 ? 'text-yellow-400' :
+                          'text-red-400';
+                        
+                        return (
+                          <tr key={product.id} className="hover:bg-white/5 transition-colors">
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 border border-white/10 overflow-hidden bg-black/40 flex-shrink-0">
+                                  <img
+                                    src={product.images?.[0]}
+                                    alt={product.name}
+                                    className="w-full h-full object-cover grayscale opacity-80"
+                                    onError={(e) => { e.target.src = '/images/placeholder-product.jpg'; }}
+                                  />
+                                </div>
+                                <div>
+                                  <p className="text-[11px] uppercase tracking-wider text-white/90">
+                                    {product.name}
+                                  </p>
+                                  <p className="text-[9px] uppercase tracking-widest text-neutral-500 truncate max-w-xs mt-0.5">
+                                    {product.shortDescription}
+                                  </p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <span className="text-[10px] uppercase tracking-wider font-mono text-pink-300 bg-pink-400/10 px-2 py-1 border border-pink-400/20">
+                                {product.productCode}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4">
+                              <span className="text-[13px] tracking-widest font-light text-white">
+                                ₦{product.price.toLocaleString()}
+                              </span>
+                              {product.originalPrice && (
+                                <p className="text-[9px] tracking-wider text-neutral-500 line-through mt-0.5">
+                                  ₦{product.originalPrice.toLocaleString()}
+                                </p>
+                              )}
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-2">
+                                <span className={`w-1.5 h-1.5 rounded-full ${stockStatus.replace('text', 'bg')}`} />
+                                <span className={`text-[9px] uppercase tracking-[0.2em] ${stockStatus}`}>
+                                  {product.stockQuantity} units
+                                </span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="flex flex-wrap gap-2">
+                                {product.isFeatured && (
+                                  <div className="flex items-center gap-1">
+                                    <span className="w-1 h-1 rounded-full bg-blue-400" />
+                                    <span className="text-[8px] uppercase tracking-[0.2em] text-blue-400">Featured</span>
+                                  </div>
+                                )}
+                                {product.isBestSeller && (
+                                  <div className="flex items-center gap-1">
+                                    <span className="w-1 h-1 rounded-full bg-yellow-400" />
+                                    <span className="text-[8px] uppercase tracking-[0.2em] text-yellow-400">Best Seller</span>
+                                  </div>
+                                )}
+                                {product.isOnSale && (
+                                  <div className="flex items-center gap-1">
+                                    <span className="w-1 h-1 rounded-full bg-pink-400" />
+                                    <span className="text-[8px] uppercase tracking-[0.2em] text-pink-400">Sale</span>
+                                  </div>
+                                )}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-2">
+                                <Link
+                                  to={`/admin/products/${product.id}`}
+                                  className="group relative px-3 py-1.5 overflow-hidden border border-white/20 text-[9px] uppercase tracking-[0.3em] text-neutral-400 bg-transparent transition-all duration-700 hover:border-white/40"
+                                >
+                                  <motion.div
+                                    className="absolute inset-0 w-0 bg-white/10 transition-all duration-700 ease-out group-hover:w-full"
+                                    whileHover={{ width: '100%' }}
+                                  />
+                                  <span className="relative z-10 group-hover:text-white transition-colors duration-700">
+                                    Edit
+                                  </span>
+                                </Link>
+                                <button
+                                  onClick={() => handleDelete(product.id)}
+                                  className="group relative px-3 py-1.5 overflow-hidden border border-white/20 text-[9px] uppercase tracking-[0.3em] text-neutral-400 bg-transparent transition-all duration-700 hover:border-white/40"
+                                >
+                                  <motion.div
+                                    className="absolute inset-0 w-0 bg-white/10 transition-all duration-700 ease-out group-hover:w-full"
+                                    whileHover={{ width: '100%' }}
+                                  />
+                                  <span className="relative z-10 group-hover:text-white transition-colors duration-700">
+                                    Delete
+                                  </span>
+                                </button>
+                                <Link
+                                  to={`/product/${product.id}`}
+                                  target="_blank"
+                                  className="group relative px-3 py-1.5 overflow-hidden border border-white/20 text-[9px] uppercase tracking-[0.3em] text-neutral-400 bg-transparent transition-all duration-700 hover:border-white/40"
+                                >
+                                  <motion.div
+                                    className="absolute inset-0 w-0 bg-white/10 transition-all duration-700 ease-out group-hover:w-full"
+                                    whileHover={{ width: '100%' }}
+                                  />
+                                  <span className="relative z-10 group-hover:text-white transition-colors duration-700">
+                                    View
+                                  </span>
+                                </Link>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
                   </tbody>
                 </table>
               </div>
             </div>
           </>
         )}
+
+        {/* Footer */}
+        <footer className="mt-16 pt-8 border-t border-white/5 text-center">
+          <p className="text-[9px] uppercase tracking-[0.6em] text-neutral-600">
+            mamusca enterprise — product administration
+          </p>
+        </footer>
       </div>
     </AdminRoute>
   );

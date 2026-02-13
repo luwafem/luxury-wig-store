@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import Input from '../common/Input';
-import Button from '../common/Button';
+import { motion } from 'framer-motion';
 import { productService } from '../../services/firebase';
 
 const ProductForm = ({ product, onSuccess }) => {
@@ -30,7 +29,6 @@ const ProductForm = ({ product, onSuccess }) => {
       category: '',
       shortDescription: '',
       description: '',
-      // ========== NEW SPECIFICATION FIELDS ==========
       length: '',
       color: '',
       hairType: '',
@@ -40,7 +38,6 @@ const ProductForm = ({ product, onSuccess }) => {
       capSize: '',
       prePlucked: false,
       bleachedKnots: false,
-      // ==============================================
       isFeatured: false,
       isBestSeller: false,
       isOnSale: false,
@@ -48,10 +45,6 @@ const ProductForm = ({ product, onSuccess }) => {
     }
   });
 
-  // Watch form values (optional)
-  const watchedValues = watch();
-
-  // ----- IMAGE HANDLING (fully implemented) -----
   const handleFileUpload = (files) => {
     setUploadingImages(true);
     const newFiles = Array.from(files);
@@ -86,31 +79,26 @@ const ProductForm = ({ product, onSuccess }) => {
 
   const getFilePreview = (file) => URL.createObjectURL(file);
 
-  // ----- FORM SUBMISSION -----
   const onSubmit = async (data) => {
     setLoading(true);
     try {
-      // Parse existing images from the form (newline separated)
       const existingImages = data.images
         ? data.images.split('\n').filter(url => url.trim() !== '')
         : [];
 
       let allImageUrls = [...existingImages];
 
-      // Upload new files if in upload mode
       if (activeImageTab === 'upload' && imageFiles.length > 0) {
         const tempProductId = product?.id || `temp-${Date.now()}`;
         const uploadedUrls = await uploadImagesToStorage(tempProductId);
         allImageUrls = [...allImageUrls, ...uploadedUrls];
       }
 
-      // Parse URL tab images if in URL mode
       if (activeImageTab === 'url') {
         const parsedUrls = parseImageUrls();
         allImageUrls = [...allImageUrls, ...parsedUrls];
       }
 
-      // Prepare product data (with all fields)
       const productData = {
         name: data.name,
         productCode: data.productCode,
@@ -120,7 +108,6 @@ const ProductForm = ({ product, onSuccess }) => {
         category: data.category,
         shortDescription: data.shortDescription,
         description: data.description,
-        // NEW SPECIFICATION FIELDS
         length: data.length || null,
         color: data.color || null,
         hairType: data.hairType || null,
@@ -130,21 +117,17 @@ const ProductForm = ({ product, onSuccess }) => {
         capSize: data.capSize || null,
         prePlucked: data.prePlucked || false,
         bleachedKnots: data.bleachedKnots || false,
-        // Status flags
         isFeatured: data.isFeatured,
         isBestSeller: data.isBestSeller,
         isOnSale: data.isOnSale,
-        // Images (unique)
         images: allImageUrls.filter((url, index, self) =>
           url && self.indexOf(url) === index
         )
       };
 
-      // Save product
       const productId = await productService.saveProduct(productData, product?.id);
       onSuccess({ ...productData, id: productId });
 
-      // Reset form if creating new product
       if (!product) {
         setValue('name', '');
         setValue('productCode', '');
@@ -154,7 +137,6 @@ const ProductForm = ({ product, onSuccess }) => {
         setValue('category', '');
         setValue('shortDescription', '');
         setValue('description', '');
-        // Reset new specification fields
         setValue('length', '');
         setValue('color', '');
         setValue('hairType', '');
@@ -178,296 +160,331 @@ const ProductForm = ({ product, onSuccess }) => {
     }
   };
 
-  // ----- RENDER -----
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
       {/* Basic Info Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Product Name */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Product Name *
+          <label className="block text-[9px] uppercase tracking-[0.4em] text-neutral-500 mb-2">
+            Product Name <span className="text-pink-400">*</span>
           </label>
           <input
             type="text"
-            className="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 py-2.5 px-3"
+            className={`w-full bg-transparent border ${
+              errors.name ? 'border-pink-400' : 'border-white/10'
+            } px-4 py-3 text-sm text-white placeholder:text-neutral-700 focus:border-pink-400 focus:outline-none transition-colors uppercase`}
+            placeholder="PRODUCT NAME"
             {...register('name', { required: 'Product name is required' })}
           />
           {errors.name && (
-            <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
+            <p className="mt-2 text-[9px] uppercase tracking-wider text-pink-400">
+              {errors.name.message}
+            </p>
           )}
         </div>
 
         {/* Product Code */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Product Code *
+          <label className="block text-[9px] uppercase tracking-[0.4em] text-neutral-500 mb-2">
+            Product Code <span className="text-pink-400">*</span>
           </label>
           <input
             type="text"
-            className="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 py-2.5 px-3"
+            className={`w-full bg-transparent border ${
+              errors.productCode ? 'border-pink-400' : 'border-white/10'
+            } px-4 py-3 text-sm text-white placeholder:text-neutral-700 focus:border-pink-400 focus:outline-none transition-colors uppercase`}
+            placeholder="LL-WIG-001"
             {...register('productCode', { required: 'Product code is required' })}
-            placeholder="e.g., LL-WIG-001"
           />
           {errors.productCode && (
-            <p className="mt-1 text-sm text-red-600">{errors.productCode.message}</p>
+            <p className="mt-2 text-[9px] uppercase tracking-wider text-pink-400">
+              {errors.productCode.message}
+            </p>
           )}
         </div>
 
         {/* Price */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Price (₦) *
+          <label className="block text-[9px] uppercase tracking-[0.4em] text-neutral-500 mb-2">
+            Price (₦) <span className="text-pink-400">*</span>
           </label>
           <input
             type="number"
             step="0.01"
             min="0"
-            className="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 py-2.5 px-3"
+            className={`w-full bg-transparent border ${
+              errors.price ? 'border-pink-400' : 'border-white/10'
+            } px-4 py-3 text-sm text-white placeholder:text-neutral-700 focus:border-pink-400 focus:outline-none transition-colors uppercase`}
+            placeholder="0.00"
             {...register('price', {
               required: 'Price is required',
               min: { value: 0, message: 'Price must be positive' }
             })}
           />
           {errors.price && (
-            <p className="mt-1 text-sm text-red-600">{errors.price.message}</p>
+            <p className="mt-2 text-[9px] uppercase tracking-wider text-pink-400">
+              {errors.price.message}
+            </p>
           )}
         </div>
 
         {/* Original Price */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-[9px] uppercase tracking-[0.4em] text-neutral-500 mb-2">
             Original Price (₦)
           </label>
           <input
             type="number"
             step="0.01"
             min="0"
-            className="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 py-2.5 px-3"
+            className="w-full bg-transparent border border-white/10 px-4 py-3 text-sm text-white placeholder:text-neutral-700 focus:border-pink-400 focus:outline-none transition-colors uppercase"
+            placeholder="0.00"
             {...register('originalPrice')}
-            placeholder="Leave empty if not on sale"
           />
-          {errors.originalPrice && (
-            <p className="mt-1 text-sm text-red-600">{errors.originalPrice.message}</p>
-          )}
         </div>
 
         {/* Stock Quantity */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Stock Quantity *
+          <label className="block text-[9px] uppercase tracking-[0.4em] text-neutral-500 mb-2">
+            Stock Quantity <span className="text-pink-400">*</span>
           </label>
           <input
             type="number"
             min="0"
-            className="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 py-2.5 px-3"
+            className={`w-full bg-transparent border ${
+              errors.stockQuantity ? 'border-pink-400' : 'border-white/10'
+            } px-4 py-3 text-sm text-white placeholder:text-neutral-700 focus:border-pink-400 focus:outline-none transition-colors uppercase`}
+            placeholder="0"
             {...register('stockQuantity', {
               required: 'Stock quantity is required',
               min: { value: 0, message: 'Stock must be positive' }
             })}
           />
           {errors.stockQuantity && (
-            <p className="mt-1 text-sm text-red-600">{errors.stockQuantity.message}</p>
+            <p className="mt-2 text-[9px] uppercase tracking-wider text-pink-400">
+              {errors.stockQuantity.message}
+            </p>
           )}
         </div>
 
         {/* Category */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Category *
+          <label className="block text-[9px] uppercase tracking-[0.4em] text-neutral-500 mb-2">
+            Category <span className="text-pink-400">*</span>
           </label>
           <select
-            className="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 py-2.5 px-3"
+            className={`w-full bg-transparent border ${
+              errors.category ? 'border-pink-400' : 'border-white/10'
+            } px-4 py-3 text-sm text-white focus:border-pink-400 focus:outline-none transition-colors uppercase appearance-none`}
             {...register('category', { required: 'Category is required' })}
           >
-            <option value="">Select Category</option>
-            <option value="lace-front-wigs">Lace Front Wigs</option>
-            <option value="360-wigs">360 Wigs</option>
-            <option value="full-lace-wigs">Full Lace Wigs</option>
-            <option value="closures">Closures</option>
-            <option value="frontals">Frontals</option>
-            <option value="hair-bundles">Hair Bundles</option>
-            <option value="u-part-wigs">U-Part Wigs</option>
+            <option value="" className="bg-black text-neutral-400">SELECT CATEGORY</option>
+            <option value="lace-front-wigs" className="bg-black text-white">LACE FRONT WIGS</option>
+            <option value="360-wigs" className="bg-black text-white">360 WIGS</option>
+            <option value="full-lace-wigs" className="bg-black text-white">FULL LACE WIGS</option>
+            <option value="closures" className="bg-black text-white">CLOSURES</option>
+            <option value="frontals" className="bg-black text-white">FRONTALS</option>
+            <option value="hair-bundles" className="bg-black text-white">HAIR BUNDLES</option>
+            <option value="u-part-wigs" className="bg-black text-white">U-PART WIGS</option>
           </select>
           {errors.category && (
-            <p className="mt-1 text-sm text-red-600">{errors.category.message}</p>
+            <p className="mt-2 text-[9px] uppercase tracking-wider text-pink-400">
+              {errors.category.message}
+            </p>
           )}
         </div>
       </div>
 
       {/* Short Description */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Short Description *
+        <label className="block text-[9px] uppercase tracking-[0.4em] text-neutral-500 mb-2">
+          Short Description <span className="text-pink-400">*</span>
         </label>
         <input
           type="text"
-          className="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 py-2.5 px-3"
+          className={`w-full bg-transparent border ${
+            errors.shortDescription ? 'border-pink-400' : 'border-white/10'
+          } px-4 py-3 text-sm text-white placeholder:text-neutral-700 focus:border-pink-400 focus:outline-none transition-colors uppercase`}
+          placeholder="BRIEF DESCRIPTION FOR PRODUCT CARDS"
           {...register('shortDescription', {
             required: 'Short description is required',
             maxLength: { value: 150, message: 'Max 150 characters' }
           })}
-          placeholder="Brief description for product cards"
         />
         {errors.shortDescription && (
-          <p className="mt-1 text-sm text-red-600">{errors.shortDescription.message}</p>
+          <p className="mt-2 text-[9px] uppercase tracking-wider text-pink-400">
+            {errors.shortDescription.message}
+          </p>
         )}
-        <p className="mt-1 text-xs text-gray-500">Max 150 characters</p>
+        <p className="mt-2 text-[8px] uppercase tracking-widest text-neutral-600">
+          Max 150 characters
+        </p>
       </div>
 
       {/* Full Description */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Full Description *
+        <label className="block text-[9px] uppercase tracking-[0.4em] text-neutral-500 mb-2">
+          Full Description <span className="text-pink-400">*</span>
         </label>
         <textarea
-          className="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 py-2.5 px-3 min-h-[150px]"
+          className={`w-full bg-transparent border ${
+            errors.description ? 'border-pink-400' : 'border-white/10'
+          } px-4 py-3 text-sm text-white placeholder:text-neutral-700 focus:border-pink-400 focus:outline-none transition-colors uppercase resize-none min-h-[150px]`}
           {...register('description', { required: 'Description is required' })}
         />
         {errors.description && (
-          <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>
+          <p className="mt-2 text-[9px] uppercase tracking-wider text-pink-400">
+            {errors.description.message}
+          </p>
         )}
       </div>
 
       {/* ========== PRODUCT SPECIFICATIONS ========== */}
-      <div className="border-t border-gray-200 pt-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Product Specifications</h3>
+      <div className="border-t border-white/5 pt-8">
+        <h3 className="text-[11px] uppercase tracking-[0.5em] font-medium text-pink-300 mb-6">
+          Product Specifications
+        </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Length */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-[9px] uppercase tracking-[0.4em] text-neutral-500 mb-2">
               Length
             </label>
             <input
               type="text"
-              className="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 py-2.5 px-3"
-              placeholder="e.g., 14 inches"
+              className="w-full bg-transparent border border-white/10 px-4 py-3 text-sm text-white placeholder:text-neutral-700 focus:border-pink-400 focus:outline-none transition-colors uppercase"
+              placeholder="14 INCHES"
               {...register('length')}
             />
           </div>
 
           {/* Color */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-[9px] uppercase tracking-[0.4em] text-neutral-500 mb-2">
               Color
             </label>
             <input
               type="text"
-              className="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 py-2.5 px-3"
-              placeholder="e.g., Natural Black, #613"
+              className="w-full bg-transparent border border-white/10 px-4 py-3 text-sm text-white placeholder:text-neutral-700 focus:border-pink-400 focus:outline-none transition-colors uppercase"
+              placeholder="NATURAL BLACK, #613"
               {...register('color')}
             />
           </div>
 
           {/* Hair Type */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-[9px] uppercase tracking-[0.4em] text-neutral-500 mb-2">
               Hair Type
             </label>
             <select
-              className="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 py-2.5 px-3"
+              className="w-full bg-transparent border border-white/10 px-4 py-3 text-sm text-white focus:border-pink-400 focus:outline-none transition-colors uppercase appearance-none"
               {...register('hairType')}
             >
-              <option value="">Select Hair Type</option>
-              <option value="Brazilian">Brazilian</option>
-              <option value="Peruvian">Peruvian</option>
-              <option value="Indian">Indian</option>
-              <option value="Malaysian">Malaysian</option>
-              <option value="Cambodian">Cambodian</option>
-              <option value="Synthetic">Synthetic</option>
+              <option value="" className="bg-black text-neutral-400">SELECT HAIR TYPE</option>
+              <option value="Brazilian" className="bg-black text-white">BRAZILIAN</option>
+              <option value="Peruvian" className="bg-black text-white">PERUVIAN</option>
+              <option value="Indian" className="bg-black text-white">INDIAN</option>
+              <option value="Malaysian" className="bg-black text-white">MALAYSIAN</option>
+              <option value="Cambodian" className="bg-black text-white">CAMBODIAN</option>
+              <option value="Synthetic" className="bg-black text-white">SYNTHETIC</option>
             </select>
           </div>
 
           {/* Texture */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-[9px] uppercase tracking-[0.4em] text-neutral-500 mb-2">
               Texture
             </label>
             <select
-              className="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 py-2.5 px-3"
+              className="w-full bg-transparent border border-white/10 px-4 py-3 text-sm text-white focus:border-pink-400 focus:outline-none transition-colors uppercase appearance-none"
               {...register('texture')}
             >
-              <option value="">Select Texture</option>
-              <option value="Straight">Straight</option>
-              <option value="Body Wave">Body Wave</option>
-              <option value="Deep Wave">Deep Wave</option>
-              <option value="Curly">Curly</option>
-              <option value="Kinky Curly">Kinky Curly</option>
-              <option value="Water Wave">Water Wave</option>
+              <option value="" className="bg-black text-neutral-400">SELECT TEXTURE</option>
+              <option value="Straight" className="bg-black text-white">STRAIGHT</option>
+              <option value="Body Wave" className="bg-black text-white">BODY WAVE</option>
+              <option value="Deep Wave" className="bg-black text-white">DEEP WAVE</option>
+              <option value="Curly" className="bg-black text-white">CURLY</option>
+              <option value="Kinky Curly" className="bg-black text-white">KINKY CURLY</option>
+              <option value="Water Wave" className="bg-black text-white">WATER WAVE</option>
             </select>
           </div>
 
           {/* Lace Color */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-[9px] uppercase tracking-[0.4em] text-neutral-500 mb-2">
               Lace Color
             </label>
             <select
-              className="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 py-2.5 px-3"
+              className="w-full bg-transparent border border-white/10 px-4 py-3 text-sm text-white focus:border-pink-400 focus:outline-none transition-colors uppercase appearance-none"
               {...register('laceColor')}
             >
-              <option value="">Select Lace Color</option>
-              <option value="Transparent">Transparent</option>
-              <option value="HD">HD</option>
-              <option value="Light Brown">Light Brown</option>
-              <option value="Medium Brown">Medium Brown</option>
-              <option value="Dark Brown">Dark Brown</option>
-              <option value="Black">Black</option>
+              <option value="" className="bg-black text-neutral-400">SELECT LACE COLOR</option>
+              <option value="Transparent" className="bg-black text-white">TRANSPARENT</option>
+              <option value="HD" className="bg-black text-white">HD</option>
+              <option value="Light Brown" className="bg-black text-white">LIGHT BROWN</option>
+              <option value="Medium Brown" className="bg-black text-white">MEDIUM BROWN</option>
+              <option value="Dark Brown" className="bg-black text-white">DARK BROWN</option>
+              <option value="Black" className="bg-black text-white">BLACK</option>
             </select>
           </div>
 
           {/* Density */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-[9px] uppercase tracking-[0.4em] text-neutral-500 mb-2">
               Density
             </label>
             <select
-              className="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 py-2.5 px-3"
+              className="w-full bg-transparent border border-white/10 px-4 py-3 text-sm text-white focus:border-pink-400 focus:outline-none transition-colors uppercase appearance-none"
               {...register('density')}
             >
-              <option value="">Select Density</option>
-              <option value="130%">130%</option>
-              <option value="150%">150%</option>
-              <option value="180%">180%</option>
-              <option value="200%">200%</option>
-              <option value="250%">250%</option>
+              <option value="" className="bg-black text-neutral-400">SELECT DENSITY</option>
+              <option value="130%" className="bg-black text-white">130%</option>
+              <option value="150%" className="bg-black text-white">150%</option>
+              <option value="180%" className="bg-black text-white">180%</option>
+              <option value="200%" className="bg-black text-white">200%</option>
+              <option value="250%" className="bg-black text-white">250%</option>
             </select>
           </div>
 
           {/* Cap Size */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-[9px] uppercase tracking-[0.4em] text-neutral-500 mb-2">
               Cap Size
             </label>
             <select
-              className="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 py-2.5 px-3"
+              className="w-full bg-transparent border border-white/10 px-4 py-3 text-sm text-white focus:border-pink-400 focus:outline-none transition-colors uppercase appearance-none"
               {...register('capSize')}
             >
-              <option value="">Select Cap Size</option>
-              <option value="Small">Small</option>
-              <option value="Medium">Medium</option>
-              <option value="Large">Large</option>
-              <option value="Extra Large">Extra Large</option>
+              <option value="" className="bg-black text-neutral-400">SELECT CAP SIZE</option>
+              <option value="Small" className="bg-black text-white">SMALL</option>
+              <option value="Medium" className="bg-black text-white">MEDIUM</option>
+              <option value="Large" className="bg-black text-white">LARGE</option>
+              <option value="Extra Large" className="bg-black text-white">EXTRA LARGE</option>
             </select>
           </div>
 
           {/* Pre‑plucked & Bleached Knots */}
-          <div className="flex flex-col space-y-2">
-            <label className="flex items-center space-x-2">
+          <div className="flex flex-col space-y-3">
+            <label className="flex items-center space-x-3">
               <input
                 type="checkbox"
                 {...register('prePlucked')}
-                className="rounded border-gray-300 text-primary-600 focus:ring-primary-500 h-4 w-4"
+                className="w-4 h-4 bg-transparent border border-white/20 checked:bg-pink-400 checked:border-pink-400 focus:ring-0 focus:ring-offset-0 focus:outline-none transition-colors"
               />
-              <span className="text-sm text-gray-700">Pre‑plucked</span>
+              <span className="text-[10px] uppercase tracking-[0.3em] text-neutral-400">
+                Pre‑plucked
+              </span>
             </label>
-            <label className="flex items-center space-x-2">
+            <label className="flex items-center space-x-3">
               <input
                 type="checkbox"
                 {...register('bleachedKnots')}
-                className="rounded border-gray-300 text-primary-600 focus:ring-primary-500 h-4 w-4"
+                className="w-4 h-4 bg-transparent border border-white/20 checked:bg-pink-400 checked:border-pink-400 focus:ring-0 focus:ring-offset-0 focus:outline-none transition-colors"
               />
-              <span className="text-sm text-gray-700">Bleached Knots</span>
+              <span className="text-[10px] uppercase tracking-[0.3em] text-neutral-400">
+                Bleached Knots
+              </span>
             </label>
           </div>
         </div>
@@ -476,18 +493,18 @@ const ProductForm = ({ product, onSuccess }) => {
 
       {/* ========== PRODUCT IMAGES ========== */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-3">
+        <label className="block text-[9px] uppercase tracking-[0.4em] text-neutral-500 mb-3">
           Product Images
         </label>
 
         {/* Tab Selection */}
-        <div className="flex border-b border-gray-200 mb-4">
+        <div className="flex border-b border-white/5 mb-6">
           <button
             type="button"
-            className={`flex-1 py-2 text-center font-medium ${
+            className={`flex-1 py-3 text-[9px] uppercase tracking-[0.3em] transition-colors border-b-2 ${
               activeImageTab === 'upload'
-                ? 'text-primary-600 border-b-2 border-primary-500'
-                : 'text-gray-500 hover:text-gray-700'
+                ? 'border-pink-400 text-white'
+                : 'border-transparent text-neutral-500 hover:text-white'
             }`}
             onClick={() => setActiveImageTab('upload')}
           >
@@ -495,10 +512,10 @@ const ProductForm = ({ product, onSuccess }) => {
           </button>
           <button
             type="button"
-            className={`flex-1 py-2 text-center font-medium ${
+            className={`flex-1 py-3 text-[9px] uppercase tracking-[0.3em] transition-colors border-b-2 ${
               activeImageTab === 'url'
-                ? 'text-primary-600 border-b-2 border-primary-500'
-                : 'text-gray-500 hover:text-gray-700'
+                ? 'border-pink-400 text-white'
+                : 'border-transparent text-neutral-500 hover:text-white'
             }`}
             onClick={() => setActiveImageTab('url')}
           >
@@ -508,11 +525,11 @@ const ProductForm = ({ product, onSuccess }) => {
 
         {/* Upload Tab */}
         {activeImageTab === 'upload' && (
-          <div className="space-y-4">
-            <div className="border-2 border-gray-300 border-dashed rounded-lg p-6">
+          <div className="space-y-6">
+            <div className="border border-white/10 border-dashed p-8 bg-black/40">
               <div className="text-center">
                 <svg
-                  className="mx-auto h-12 w-12 text-gray-400"
+                  className="mx-auto h-12 w-12 text-neutral-600"
                   stroke="currentColor"
                   fill="none"
                   viewBox="0 0 48 48"
@@ -525,9 +542,9 @@ const ProductForm = ({ product, onSuccess }) => {
                     strokeLinejoin="round"
                   />
                 </svg>
-                <div className="flex justify-center text-sm text-gray-600 mt-2">
-                  <label className="relative cursor-pointer bg-white rounded-md font-medium text-primary-600 hover:text-primary-500">
-                    <span>Upload images</span>
+                <div className="flex justify-center text-[9px] uppercase tracking-[0.3em] text-neutral-400 mt-4">
+                  <label className="relative cursor-pointer border-b border-transparent hover:border-pink-400 transition-colors">
+                    <span className="text-pink-400">Upload images</span>
                     <input
                       type="file"
                       className="sr-only"
@@ -536,9 +553,9 @@ const ProductForm = ({ product, onSuccess }) => {
                       onChange={(e) => handleFileUpload(e.target.files)}
                     />
                   </label>
-                  <p className="pl-1">or drag and drop</p>
+                  <p className="pl-2 text-neutral-500">or drag and drop</p>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-[8px] uppercase tracking-widest text-neutral-600 mt-2">
                   PNG, JPG, GIF up to 10MB each
                 </p>
               </div>
@@ -547,27 +564,27 @@ const ProductForm = ({ product, onSuccess }) => {
             {/* Preview Uploaded Files */}
             {imageFiles.length > 0 && (
               <div>
-                <h4 className="text-sm font-medium text-gray-700 mb-2">
+                <h4 className="text-[10px] uppercase tracking-[0.4em] text-neutral-400 mb-3">
                   Selected Images ({imageFiles.length})
                 </h4>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {imageFiles.map((file, index) => (
-                    <div key={index} className="relative group">
+                    <div key={index} className="relative group border border-white/5 bg-black/40 p-2">
                       <img
                         src={getFilePreview(file)}
                         alt={`Preview ${index + 1}`}
-                        className="w-full h-32 object-cover rounded-lg"
+                        className="w-full h-24 object-cover grayscale opacity-80 group-hover:opacity-100 transition-opacity"
                       />
-                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all rounded-lg flex items-center justify-center">
-                        <button
-                          type="button"
-                          onClick={() => removeImageFile(index)}
-                          className="opacity-0 group-hover:opacity-100 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center transition-all"
-                        >
-                          ×
-                        </button>
-                      </div>
-                      <p className="text-xs text-gray-500 mt-1 truncate">{file.name}</p>
+                      <button
+                        type="button"
+                        onClick={() => removeImageFile(index)}
+                        className="absolute top-1 right-1 w-6 h-6 bg-black/80 border border-white/20 text-white flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity hover:border-pink-400"
+                      >
+                        ×
+                      </button>
+                      <p className="text-[8px] text-neutral-500 mt-1 truncate uppercase">
+                        {file.name}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -576,7 +593,9 @@ const ProductForm = ({ product, onSuccess }) => {
 
             {uploadingImages && (
               <div className="text-center py-4">
-                <p className="text-sm text-gray-600">Uploading images...</p>
+                <p className="text-[9px] uppercase tracking-[0.3em] text-neutral-400">
+                  Uploading images...
+                </p>
               </div>
             )}
           </div>
@@ -584,18 +603,18 @@ const ProductForm = ({ product, onSuccess }) => {
 
         {/* URL Tab */}
         {activeImageTab === 'url' && (
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-[9px] uppercase tracking-[0.4em] text-neutral-500 mb-2">
                 Image URLs (one per line)
               </label>
               <textarea
-                className="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 py-2.5 px-3 min-h-[150px]"
+                className="w-full bg-transparent border border-white/10 px-4 py-3 text-sm text-white placeholder:text-neutral-700 focus:border-pink-400 focus:outline-none transition-colors uppercase resize-none min-h-[120px]"
                 value={imageUrls}
                 onChange={(e) => setImageUrls(e.target.value)}
-                placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg&#10;https://example.com/image3.jpg"
+                placeholder="HTTPS://EXAMPLE.COM/IMAGE1.JPG&#10;HTTPS://EXAMPLE.COM/IMAGE2.JPG"
               />
-              <p className="mt-1 text-xs text-gray-500">
+              <p className="mt-2 text-[8px] uppercase tracking-widest text-neutral-600">
                 Enter one image URL per line. URLs should start with http:// or https://
               </p>
             </div>
@@ -603,22 +622,22 @@ const ProductForm = ({ product, onSuccess }) => {
             {/* Preview URL Images */}
             {imageUrls && (
               <div>
-                <h4 className="text-sm font-medium text-gray-700 mb-2">Image Preview</h4>
+                <h4 className="text-[10px] uppercase tracking-[0.4em] text-neutral-400 mb-3">Image Preview</h4>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {imageUrls
                     .split('\n')
                     .filter(url => url.trim() !== '')
                     .map((url, index) => (
-                      <div key={index} className="relative">
+                      <div key={index} className="border border-white/5 bg-black/40 p-2">
                         <img
                           src={url.trim()}
                           alt={`URL Preview ${index + 1}`}
-                          className="w-full h-32 object-cover rounded-lg"
+                          className="w-full h-24 object-cover grayscale opacity-80"
                           onError={(e) => {
-                            e.target.src = 'https://via.placeholder.com/300x200?text=Image+Error';
+                            e.target.src = '/images/placeholder-product.jpg';
                           }}
                         />
-                        <p className="text-xs text-gray-500 mt-1 truncate">
+                        <p className="text-[8px] text-neutral-500 mt-1 truncate uppercase">
                           {url.trim().substring(0, 30)}...
                         </p>
                       </div>
@@ -631,17 +650,17 @@ const ProductForm = ({ product, onSuccess }) => {
 
         {/* Existing Images (for editing) */}
         {product?.images && product.images.length > 0 && (
-          <div className="mt-6">
-            <h4 className="text-sm font-medium text-gray-700 mb-2">Existing Images</h4>
+          <div className="mt-8">
+            <h4 className="text-[10px] uppercase tracking-[0.4em] text-neutral-400 mb-3">Existing Images</h4>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {product.images.map((url, index) => (
-                <div key={index} className="relative">
+                <div key={index} className="border border-white/5 bg-black/40 p-2">
                   <img
                     src={url}
                     alt={`Existing ${index + 1}`}
-                    className="w-full h-32 object-cover rounded-lg"
+                    className="w-full h-24 object-cover grayscale opacity-80"
                   />
-                  <p className="text-xs text-gray-500 mt-1 truncate">
+                  <p className="text-[8px] text-neutral-500 mt-1 truncate uppercase">
                     {url.substring(0, 30)}...
                   </p>
                 </div>
@@ -653,54 +672,68 @@ const ProductForm = ({ product, onSuccess }) => {
       {/* ========== END PRODUCT IMAGES ========== */}
 
       {/* Status Toggles */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <label className="flex items-center space-x-2">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
+        <label className="flex items-center space-x-3">
           <input
             type="checkbox"
             {...register('isFeatured')}
-            className="rounded border-gray-300 text-primary-600 focus:ring-primary-500 h-4 w-4"
+            className="w-4 h-4 bg-transparent border border-white/20 checked:bg-pink-400 checked:border-pink-400 focus:ring-0 focus:ring-offset-0 focus:outline-none transition-colors"
           />
-          <span className="text-sm text-gray-700">Featured Product</span>
+          <span className="text-[10px] uppercase tracking-[0.3em] text-neutral-400">
+            Featured Product
+          </span>
         </label>
-        <label className="flex items-center space-x-2">
+        <label className="flex items-center space-x-3">
           <input
             type="checkbox"
             {...register('isBestSeller')}
-            className="rounded border-gray-300 text-primary-600 focus:ring-primary-500 h-4 w-4"
+            className="w-4 h-4 bg-transparent border border-white/20 checked:bg-pink-400 checked:border-pink-400 focus:ring-0 focus:ring-offset-0 focus:outline-none transition-colors"
           />
-          <span className="text-sm text-gray-700">Best Seller</span>
+          <span className="text-[10px] uppercase tracking-[0.3em] text-neutral-400">
+            Best Seller
+          </span>
         </label>
-        <label className="flex items-center space-x-2">
+        <label className="flex items-center space-x-3">
           <input
             type="checkbox"
             {...register('isOnSale')}
-            className="rounded border-gray-300 text-primary-600 focus:ring-primary-500 h-4 w-4"
+            className="w-4 h-4 bg-transparent border border-white/20 checked:bg-pink-400 checked:border-pink-400 focus:ring-0 focus:ring-offset-0 focus:outline-none transition-colors"
           />
-          <span className="text-sm text-gray-700">On Sale</span>
+          <span className="text-[10px] uppercase tracking-[0.3em] text-neutral-400">
+            On Sale
+          </span>
         </label>
       </div>
 
       {/* Form Submission */}
-      <div className="flex space-x-4">
-        <Button
+      <div className="flex space-x-6 pt-8 border-t border-white/5">
+        <button
           type="button"
-          variant="outline"
-          size="lg"
-          onClick={() => {
-            if (onSuccess) onSuccess(null);
-          }}
+          onClick={() => onSuccess(null)}
+          className="group relative flex-1 h-14 overflow-hidden border border-white/20 text-[10px] uppercase tracking-[0.4em] text-neutral-400 bg-transparent transition-all duration-700 hover:border-white/40"
         >
-          Cancel
-        </Button>
-        <Button
+          <motion.div
+            className="absolute inset-0 w-0 bg-white/10 transition-all duration-700 ease-out group-hover:w-full"
+            whileHover={{ width: '100%' }}
+          />
+          <span className="relative z-10 group-hover:text-white transition-colors duration-700">
+            Cancel
+          </span>
+        </button>
+        
+        <button
           type="submit"
-          variant="primary"
-          size="lg"
-          loading={loading}
-          className="flex-1"
+          disabled={loading}
+          className="group relative flex-1 h-14 overflow-hidden border border-white text-[10px] uppercase tracking-[0.4em] font-bold text-white bg-transparent transition-all duration-700 disabled:opacity-50"
         >
-          {product ? 'Update Product' : 'Add Product'}
-        </Button>
+          <motion.div
+            className="absolute inset-0 w-0 bg-white transition-all duration-700 ease-out group-hover:w-full"
+            whileHover={{ width: '100%' }}
+          />
+          <span className="relative z-10 group-hover:text-black transition-colors duration-700">
+            {loading ? 'Processing...' : product ? 'Update Product' : 'Add Product'}
+          </span>
+        </button>
       </div>
     </form>
   );

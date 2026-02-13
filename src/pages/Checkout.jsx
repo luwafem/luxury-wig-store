@@ -216,60 +216,73 @@ const Checkout = () => {
   };
 
   const handleSubmit = async (data) => {
-    if (cart.length === 0) return;
-    setLoading(true);
+  if (cart.length === 0) return;
+  setLoading(true);
 
-    try {
-      const orderData = {
-        customer: { ...data },
-        items: cart.map(item => ({
-          id: item.id,
-          name: item.name,
-          productCode: item.productCode,
-          price: item.price,
-          quantity: item.quantity,
-          image: item.images?.[0],
-        })),
-        subtotal,
-        shipping,
-        totalAmount: total,
-        status: 'pending',
-      };
+  try {
+    // 1️⃣ Create ORDER ONLY (no stock updates)
+    const orderData = {
+      customer: { ...data },
+      items: cart.map(item => ({
+        id: item.id,
+        name: item.name,
+        productCode: item.productCode,
+        price: item.price,
+        quantity: item.quantity,
+        image: item.images?.[0] || null,
+      })),
+      subtotal,
+      shipping,
+      totalAmount: total,
+      status: 'pending',          // 👈 very important
+      paymentStatus: 'pending',   // 👈 very important
+    };
 
-      console.log('🧾 Cart contents:', JSON.stringify(cart, null, 2));
-      console.log('🧾 Order items:', cart.map(item => ({ id: item.id, name: item.name })));
+    const order = await orderService.createOrder(orderData);
 
-      const order = await orderService.createOrder(orderData);
-
-      paystackService.initializePayment(
-        data.email,
-        order.totalAmount,
-        order.id,
-        { order_id: order.id, customer_name: data.fullName },
-        async (response) => {
+    // 2️⃣ Initialize Paystack payment
+    paystackService.initializePayment(
+      data.email,
+      order.totalAmount,
+      order.id,
+      {
+        order_id: order.id,
+        customer_name: data.fullName,
+      },
+      async (response) => {
+        try {
           if (response.status === 'success') {
+            // 3️⃣ Update ORDER ONLY (admin/server will handle stock later)
             await orderService.updateOrder(order.id, {
               paymentStatus: 'paid',
               paymentReference: response.reference,
-              status: 'processing',
+              status: 'processing', // or 'confirmed'
+              updatedAt: new Date(),
             });
 
             clearCart();
 
+            // 4️⃣ Send confirmation email
             await sendOrderConfirmationEmail(order, orderData.customer);
 
             navigate(`/order-confirmation/${order.id}`);
           } else {
             alert('Transaction declined. Please try again.');
           }
+        } catch (err) {
+          console.error('❌ Post-payment update failed:', err);
+          alert('Payment received but order update failed. Please contact support.');
+        } finally {
           setLoading(false);
         }
-      );
-    } catch (error) {
-      console.error('❌ Order creation error:', error);
-      setLoading(false);
-    }
-  };
+      }
+    );
+  } catch (error) {
+    console.error('❌ Order creation error:', error);
+    setLoading(false);
+  }
+};
+
 
   if (cart.length === 0) {
     return (

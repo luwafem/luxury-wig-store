@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import AdminRoute from '../../components/admin/AdminRoute';
-import { orderService } from '../../services/firebase';
+import { orderService, productService } from '../../services/firebase';
 import { qrCodeService } from '../../services/qrcode';
 
 const Orders = () => {
@@ -26,82 +26,125 @@ const Orders = () => {
     setLoading(true);
     try {
       const ordersData = await orderService.getAllOrders();
-      
+
       const formattedOrders = ordersData.map(order => ({
         ...order,
         createdAt: order.createdAt?.toDate?.() || new Date(order.createdAt),
         updatedAt: order.updatedAt?.toDate?.() || new Date(order.updatedAt),
-        customer: order.customer || {
-          fullName: '',
-          email: '',
-          phone: '',
-          address: '',
-          city: '',
-          state: '',
-          instructions: '',
-        },
         items: order.items || [],
+        stockUpdated: order.stockUpdated || false,
       }));
 
       setOrders(formattedOrders);
 
-      const statsData = {
+      setStats({
         total: formattedOrders.length,
         pending: formattedOrders.filter(o => o.status === 'pending').length,
         processing: formattedOrders.filter(o => o.status === 'processing').length,
         shipped: formattedOrders.filter(o => o.status === 'shipped').length,
         delivered: formattedOrders.filter(o => o.status === 'delivered').length,
-      };
-      setStats(statsData);
+      });
 
       if (id) {
-        const order = formattedOrders.find(o => o.id === id);
-        setSelectedOrder(order || null);
+        setSelectedOrder(formattedOrders.find(o => o.id === id) || null);
       }
-    } catch (error) {
-      console.error('Error fetching orders:', error);
+    } catch (err) {
+      console.error('Error fetching orders:', err);
     } finally {
       setLoading(false);
     }
   };
 
+  // 🔥 STOCK UPDATE (SAFE & GUARDED)
+  const updateStockForOrder = async (order) => {
+    if (!order?.items?.length || order.stockUpdated) return;
+
+    for (const item of order.items) {
+      if (!item.id || !item.quantity) continue;
+      await productService.decrementStock(item.id, item.quantity);
+    }
+
+    await orderService.updateOrder(order.id, {
+      stockUpdated: true,
+      updatedAt: new Date(),
+    });
+  };
+
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
-      await orderService.updateOrder(orderId, { status: newStatus });
-      
-      setOrders(prevOrders =>
-        prevOrders.map(order =>
-          order.id === orderId
-            ? { ...order, status: newStatus, updatedAt: new Date() }
-            : order
+      const order = orders.find(o => o.id === orderId);
+      if (!order) return;
+
+      await orderService.updateOrder(orderId, {
+        status: newStatus,
+        updatedAt: new Date(),
+      });
+
+      // ✅ deduct stock ONLY here
+      if (
+        newStatus === 'processing' &&
+        order.paymentStatus === 'paid' &&
+        !order.stockUpdated
+      ) {
+        await updateStockForOrder(order);
+      }
+
+      setOrders(prev =>
+        prev.map(o =>
+          o.id === orderId
+            ? {
+                ...o,
+                status: newStatus,
+                stockUpdated:
+                  newStatus === 'processing' && o.paymentStatus === 'paid'
+                    ? true
+                    : o.stockUpdated,
+                updatedAt: new Date(),
+              }
+            : o
         )
       );
-      
+
       if (selectedOrder?.id === orderId) {
-        setSelectedOrder({ ...selectedOrder, status: newStatus, updatedAt: new Date() });
+        setSelectedOrder(prev => ({
+          ...prev,
+          status: newStatus,
+          stockUpdated:
+            newStatus === 'processing' && prev.paymentStatus === 'paid'
+              ? true
+              : prev.stockUpdated,
+          updatedAt: new Date(),
+        }));
       }
-    } catch (error) {
-      console.error('Error updating order status:', error);
+    } catch (err) {
+      console.error('Error updating order status:', err);
     }
   };
 
   const updatePaymentStatus = async (orderId, newStatus) => {
     try {
-      await orderService.updateOrder(orderId, { paymentStatus: newStatus });
-      
-      setOrders(prevOrders =>
-        prevOrders.map(order =>
-          order.id === orderId
-            ? { ...order, paymentStatus: newStatus, updatedAt: new Date() }
-            : order
+      await orderService.updateOrder(orderId, {
+        paymentStatus: newStatus,
+        updatedAt: new Date(),
+      });
+
+      setOrders(prev =>
+        prev.map(o =>
+          o.id === orderId
+            ? { ...o, paymentStatus: newStatus, updatedAt: new Date() }
+            : o
         )
       );
-      
+
       if (selectedOrder?.id === orderId) {
-        setSelectedOrder({ ...selectedOrder, paymentStatus: newStatus, updatedAt: new Date() });
+        setSelectedOrder(prev => ({
+          ...prev,
+          paymentStatus: newStatus,
+          updatedAt: new Date(),
+        }));
       }
-    } catch (error) {
-      console.error('Error updating payment status:', error);
+    } catch (err) {
+      console.error('Error updating payment status:', err);
     }
   };
 
@@ -139,7 +182,7 @@ const Orders = () => {
       </AdminRoute>
     );
   }
-
+  
   return (
     <AdminRoute>
       <div className="bg-black text-white antialiased min-h-screen p-6">

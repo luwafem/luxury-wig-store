@@ -434,21 +434,42 @@ export const orderService = {
       orderNumber: `LL${now.toDate().getFullYear()}${orderId.slice(-6).toUpperCase()}`,
     };
 
-    const batch = writeBatch(db);
-    for (const item of orderData.items) {
-      if (!item.id) {
-        console.warn('⚠️ Skipping item with missing ID:', item);
-        continue; // Skip stock update, but keep item in order
-      }
-      const productRef = doc(db, COLLECTIONS.PRODUCTS, item.id);
-      batch.update(productRef, {
-        stockQuantity: item.stockAfterSale || 0,
-        salesCount: (item.currentSales || 0) + (item.quantity || 0),
-      });
-    }
+    // Use a transaction to read and write stock safely
+    await runTransaction(db, async (transaction) => {
+      for (const item of orderData.items) {
+        if (!item.id) {
+          console.warn('⚠️ Skipping item with missing ID:', item);
+          continue;
+        }
 
-    await batch.commit();
-    await setDoc(orderRef, order);
+        const productRef = doc(db, COLLECTIONS.PRODUCTS, item.id);
+        const productSnap = await transaction.get(productRef);
+
+        if (!productSnap.exists()) {
+          throw new Error(`Product ${item.id} not found`);
+        }
+
+        const productData = productSnap.data();
+        const currentStock = productData.stockQuantity || 0;
+        const newStock = currentStock - (item.quantity || 0);
+
+        if (newStock < 0) {
+          throw new Error(`Insufficient stock for product ${item.id}`);
+        }
+
+        const currentSales = productData.salesCount || 0;
+        const newSales = currentSales + (item.quantity || 0);
+
+        transaction.update(productRef, {
+          stockQuantity: newStock,
+          salesCount: newSales,
+        });
+      }
+
+      // Finally, create the order document
+      transaction.set(orderRef, order);
+    });
+
     return order;
   } catch (error) {
     console.error('❌ Error creating order:', error);

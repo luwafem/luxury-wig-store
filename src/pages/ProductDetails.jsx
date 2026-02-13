@@ -107,22 +107,27 @@ const ProductDetails = () => {
   useEffect(() => {
     let isMounted = true;
     const fetchProduct = async () => {
-      try {
-        const productData = await productService.getProductById(id);
-        if (!isMounted) return;
-        const productWithImages = {
-          ...productData,
-          images: Array.isArray(productData?.images)
-            ? productData.images.filter((img) => img && img.trim() !== '')
-            : [],
-        };
-        setProduct(productWithImages);
-      } catch (error) {
-        console.error('Error fetching product:', error);
-      } finally {
-        if (isMounted) setLoading(false);
-      }
+  try {
+    const productData = await productService.getProductById(id); // ✅ YOU MISSED THIS
+
+    if (!productData || !isMounted) return;
+
+    const productWithImages = {
+      id, // ✅ attach Firestore document ID
+      ...productData,
+      images: Array.isArray(productData.images)
+        ? productData.images.filter((img) => img && img.trim() !== '')
+        : [],
     };
+
+    setProduct(productWithImages);
+  } catch (error) {
+    console.error('Error fetching product:', error);
+  } finally {
+    if (isMounted) setLoading(false);
+  }
+};
+
     const fetchBestSellers = async () => {
       try {
         setBestSellersLoading(true);
@@ -167,33 +172,34 @@ const ProductDetails = () => {
   }, [product]);
 
   const safeProduct = useMemo(() => {
-    if (!product) return null;
-    return {
-      name: product.name || 'Unnamed Selection',
-      productCode: product.productCode || 'N/A',
-      price: product.price || 0,
-      originalPrice: product.originalPrice || 0,
-      stockQuantity: product.stockQuantity || 0,
-      shortDescription: product.shortDescription || 'No description available',
-      description: product.description || '',
-      images: product.images || [],
-      isBestSeller: product.isBestSeller || false,
-      isOnSale: product.isOnSale || false,
-      isFeatured: product.isFeatured || false,
-      length: product.length,
-      color: product.color,
-      hairType: product.hairType,
-      texture: product.texture,
-      laceColor: product.laceColor,
-      density: product.density,
-      capSize: product.capSize,
-      prePlucked: product.prePlucked,
-      bleachedKnots: product.bleachedKnots,
-      specifications: product.specifications || {},
-      views: product.views || 0,
-      salesCount: product.salesCount || 0,
-    };
-  }, [product]);
+  if (!product) return null;
+  return {
+    id: product.id, // ✅ REQUIRED for CartContext
+    name: product.name || 'Unnamed Selection',
+    productCode: product.productCode || 'N/A',
+    price: product.price || 0,
+    originalPrice: product.originalPrice || 0,
+    stockQuantity: product.stockQuantity || 0,
+    shortDescription: product.shortDescription || 'No description available',
+    description: product.description || '',
+    images: product.images || [],
+    isBestSeller: product.isBestSeller || false,
+    isOnSale: product.isOnSale || false,
+    isFeatured: product.isFeatured || false,
+    length: product.length,
+    color: product.color,
+    hairType: product.hairType,
+    texture: product.texture,
+    laceColor: product.laceColor,
+    density: product.density,
+    capSize: product.capSize,
+    prePlucked: product.prePlucked,
+    bleachedKnots: product.bleachedKnots,
+    specifications: product.specifications || {},
+    views: product.views || 0,
+    salesCount: product.salesCount || 0,
+  };
+}, [product]);
 
   const whatsappLink = useMemo(() => {
     return safeProduct ? whatsappService.sendProductInquiry(safeProduct) : '#';

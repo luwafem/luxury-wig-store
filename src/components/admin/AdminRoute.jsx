@@ -91,7 +91,7 @@ const AdminRoute = ({ children }) => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Main Admin Header - Fixed position */}
-      <header className="fixed top-16 left-0 right-0 z-40 bg-white border-b shadow-sm">
+      <header className="fixed top-16 left-0 right-0 z-40 bg-white border-b shadow-sm ">
         <div className="px-6 py-3">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
             {/* Left side: Page title and admin navigation */}

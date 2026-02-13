@@ -31,7 +31,7 @@ export const siteConfig = {
   
   // Payment Configuration
   payment: {
-    paystackPublicKey: process.env.REACT_APP_PAYSTACK_PUBLIC_KEY,
+    paystackPublicKey: process.env.REACT_APP_PAYSTACK_PUBLIC_KEY || 'pk_test_129628160c0fdb0e1e837751e5ff0233872676b8',
     currency: "NGN",
   },
   

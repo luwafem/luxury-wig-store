@@ -2,10 +2,20 @@ import { siteConfig } from '../config/siteConfig';
 
 export const paystackService = {
   initializePayment(email, amount, reference, metadata, callback) {
-    if (!window.PaystackPop) {
-      console.error('Paystack script not loaded');
-      return;
-    }
+  console.log('🔑 Paystack Public Key:', this.key || siteConfig.payment.paystackPublicKey);
+
+  if (!window.PaystackPop) {
+    console.error('❌ Paystack script not loaded – add <script src="https://js.paystack.co/v1/inline.js"></script> to index.html');
+    alert('Payment system unavailable. Please refresh.');
+    return;
+  }
+
+  const key = siteConfig.payment.paystackPublicKey;
+  if (!key || key === '') {
+    console.error('❌ Paystack public key is missing');
+    alert('Payment configuration error. Contact support.');
+    return;
+  }
     
     const handler = window.PaystackPop.setup({
       key: siteConfig.payment.paystackPublicKey,

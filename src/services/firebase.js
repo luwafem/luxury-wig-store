@@ -67,23 +67,51 @@ export const productService = {
       let q = collection(db, COLLECTIONS.PRODUCTS);
       const constraints = [];
       
+      // === Existing filters ===
       if (filters.category) {
         constraints.push(where('category', '==', filters.category));
       }
-      
       if (filters.isFeatured) {
         constraints.push(where('isFeatured', '==', true));
       }
-      
       if (filters.isBestSeller) {
         constraints.push(where('isBestSeller', '==', true));
       }
-      
       if (filters.minPrice || filters.maxPrice) {
         if (filters.minPrice) constraints.push(where('price', '>=', filters.minPrice));
         if (filters.maxPrice) constraints.push(where('price', '<=', filters.maxPrice));
       }
       
+      // === NEW: Product specification filters (exact match) ===
+      if (filters.length) {
+        constraints.push(where('length', '==', filters.length));
+      }
+      if (filters.color) {
+        constraints.push(where('color', '==', filters.color));
+      }
+      if (filters.hairType) {
+        constraints.push(where('hairType', '==', filters.hairType));
+      }
+      if (filters.texture) {
+        constraints.push(where('texture', '==', filters.texture));
+      }
+      if (filters.laceColor) {
+        constraints.push(where('laceColor', '==', filters.laceColor));
+      }
+      if (filters.density) {
+        constraints.push(where('density', '==', filters.density));
+      }
+      if (filters.capSize) {
+        constraints.push(where('capSize', '==', filters.capSize));
+      }
+      if (filters.prePlucked !== undefined) {
+        constraints.push(where('prePlucked', '==', filters.prePlucked));
+      }
+      if (filters.bleachedKnots !== undefined) {
+        constraints.push(where('bleachedKnots', '==', filters.bleachedKnots));
+      }
+      
+      // === Ordering ===
       if (constraints.length > 0) {
         constraints.push(orderBy('createdAt', 'desc'));
         q = query(q, ...constraints);
@@ -221,10 +249,31 @@ export const productService = {
     try {
       const now = Timestamp.now();
       const product = {
-        ...productData,
+        // Core fields
+        name: productData.name,
+        productCode: productData.productCode,
         price: Number(productData.price),
         originalPrice: Number(productData.originalPrice) || 0,
         stockQuantity: Number(productData.stockQuantity),
+        category: productData.category,
+        shortDescription: productData.shortDescription,
+        description: productData.description,
+        // New specification fields
+        length: productData.length || null,
+        color: productData.color || null,
+        hairType: productData.hairType || null,
+        texture: productData.texture || null,
+        laceColor: productData.laceColor || null,
+        density: productData.density || null,
+        capSize: productData.capSize || null,
+        prePlucked: productData.prePlucked || false,
+        bleachedKnots: productData.bleachedKnots || false,
+        // Flags
+        isFeatured: productData.isFeatured || false,
+        isBestSeller: productData.isBestSeller || false,
+        isOnSale: productData.isOnSale || false,
+        // Images & timestamps
+        images: productData.images || [],
         updatedAt: now,
       };
       
@@ -247,6 +296,7 @@ export const productService = {
       throw error;
     }
   },
+
   
   async deleteProduct(id) {
     try {
@@ -324,22 +374,31 @@ export const productService = {
     try {
       const allProducts = await this.getAllProducts();
       
-      // Filter by search term
-      let filtered = allProducts.filter(product => 
-        product.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.productCode?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+      // Filter by search term (case‑insensitive)
+      let filtered = allProducts.filter(product => {
+        const lowerTerm = searchTerm.toLowerCase();
+        return (
+          product.name?.toLowerCase().includes(lowerTerm) ||
+          product.description?.toLowerCase().includes(lowerTerm) ||
+          product.productCode?.toLowerCase().includes(lowerTerm) ||
+          // NEW: search inside specification fields
+          product.color?.toLowerCase().includes(lowerTerm) ||
+          product.hairType?.toLowerCase().includes(lowerTerm) ||
+          product.texture?.toLowerCase().includes(lowerTerm) ||
+          product.laceColor?.toLowerCase().includes(lowerTerm) ||
+          product.density?.toLowerCase().includes(lowerTerm) ||
+          product.capSize?.toLowerCase().includes(lowerTerm)
+        );
+      });
       
-      // Apply additional filters
+      // Apply additional filters (category, price range, etc.) – already done in getAllProducts
+      // But we still respect the filters object passed to searchProducts
       if (filters.category) {
         filtered = filtered.filter(product => product.category === filters.category);
       }
-      
       if (filters.minPrice) {
         filtered = filtered.filter(product => product.price >= filters.minPrice);
       }
-      
       if (filters.maxPrice) {
         filtered = filtered.filter(product => product.price <= filters.maxPrice);
       }
@@ -355,42 +414,47 @@ export const productService = {
 // Enhanced Order Services
 export const orderService = {
   async createOrder(orderData, userId = null) {
-    try {
-      const now = Timestamp.now();
-      const orderRef = doc(collection(db, COLLECTIONS.ORDERS));
-      const orderId = orderRef.id;
-      
-      const order = {
-        ...orderData,
-        id: orderId,
-        userId: userId,
-        createdAt: now,
-        updatedAt: now,
-        status: 'pending',
-        paymentStatus: 'pending',
-        orderNumber: `LL${now.toDate().getFullYear()}${orderId.slice(-6).toUpperCase()}`,
-      };
-      
-      // Update product stock
-      const batch = writeBatch(db);
-      
-      for (const item of orderData.items) {
-        const productRef = doc(db, COLLECTIONS.PRODUCTS, item.id);
-        batch.update(productRef, {
-          stockQuantity: item.stockAfterSale || 0,
-          salesCount: (item.currentSales || 0) + item.quantity
-        });
-      }
-      
-      await batch.commit();
-      await setDoc(orderRef, order);
-      
-      return order;
-    } catch (error) {
-      console.error('Error creating order:', error);
-      throw error;
+  try {
+    if (!orderData?.items || !Array.isArray(orderData.items)) {
+      throw new Error('Order items are required');
     }
-  },
+
+    const now = Timestamp.now();
+    const orderRef = doc(collection(db, COLLECTIONS.ORDERS));
+    const orderId = orderRef.id;
+
+    const order = {
+      ...orderData,
+      id: orderId,
+      userId,
+      createdAt: now,
+      updatedAt: now,
+      status: 'pending',
+      paymentStatus: 'pending',
+      orderNumber: `LL${now.toDate().getFullYear()}${orderId.slice(-6).toUpperCase()}`,
+    };
+
+    const batch = writeBatch(db);
+    for (const item of orderData.items) {
+      if (!item.id) {
+        console.warn('⚠️ Skipping item with missing ID:', item);
+        continue; // Skip stock update, but keep item in order
+      }
+      const productRef = doc(db, COLLECTIONS.PRODUCTS, item.id);
+      batch.update(productRef, {
+        stockQuantity: item.stockAfterSale || 0,
+        salesCount: (item.currentSales || 0) + (item.quantity || 0),
+      });
+    }
+
+    await batch.commit();
+    await setDoc(orderRef, order);
+    return order;
+  } catch (error) {
+    console.error('❌ Error creating order:', error);
+    throw error;
+  }
+},
   
   async updateOrder(orderId, updates) {
     try {

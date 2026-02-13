@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import SEO from '../components/common/SEO';
 import { siteConfig } from '../config/siteConfig';
 
@@ -173,6 +174,119 @@ Exchanges are subject to product availability.`
 
   const currentPolicy = policies[activePolicy];
 
+  // ─────────────────────────────────────────────────────────
+  //  PERFECT HEART – solid, filled, smooth
+  //  Placed only on left/right edges, balanced counts
+  // ─────────────────────────────────────────────────────────
+  const PerfectHeart = ({ size, color, opacity, rotate, delay }) => {
+    const heartPath = "M12,4 C8,-2 0,0 0,7 C0,14 12,20 12,20 C12,20 24,14 24,7 C24,0 16,-2 12,4 Z";
+
+    return (
+      <motion.svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        style={{ rotate }}
+        initial={{ opacity: 0, y: 0, scale: 0.9 }}
+        animate={{ 
+          opacity: 1,
+          y: [0, -6, 0],
+          scale: 1
+        }}
+        transition={{
+          opacity: { delay, duration: 0.6, ease: "easeOut" },
+          scale: { delay, duration: 0.6, ease: "easeOut" },
+          y: {
+            duration: 4 + Math.random() * 3,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: delay + 0.8
+          }
+        }}
+      >
+        <path
+          d={heartPath}
+          fill={color}
+          fillOpacity={opacity}
+        />
+      </motion.svg>
+    );
+  };
+
+  const DecorativeElements = () => {
+    const [elements, setElements] = useState([]);
+
+    useEffect(() => {
+      const isMobile = window.innerWidth < 768;
+      const total = isMobile
+        ? Math.floor(Math.random() * 5) + 3   // 3–8
+        : Math.floor(Math.random() * 7) + 5; // 5–12
+      
+      const leftCount = Math.ceil(total / 2);
+      const rightCount = Math.floor(total / 2);
+      
+      const minSize = isMobile ? 24 : 32;
+      const maxSize = isMobile ? 54 : 84;
+      
+      const newElements = [];
+
+      for (let i = 0; i < leftCount; i++) {
+        newElements.push({
+          id: `POLICY-L-${i}`,
+          x: Math.random() * 15,
+          y: Math.random() * 100,
+          size: Math.floor(Math.random() * (maxSize - minSize + 1)) + minSize,
+          rotate: Math.random() * 360,
+          opacity: Math.random() * 0.4 + 0.5,
+          color: `rgba(236, 72, 153, ${Math.random() * 0.4 + 0.5})`,
+          delay: i * 0.15,
+        });
+      }
+
+      for (let i = 0; i < rightCount; i++) {
+        newElements.push({
+          id: `POLICY-R-${i}`,
+          x: Math.random() * 15 + 85,
+          y: Math.random() * 100,
+          size: Math.floor(Math.random() * (maxSize - minSize + 1)) + minSize,
+          rotate: Math.random() * 360,
+          opacity: Math.random() * 0.4 + 0.5,
+          color: `rgba(236, 72, 153, ${Math.random() * 0.4 + 0.5})`,
+          delay: (leftCount + i) * 0.15,
+        });
+      }
+
+      setElements(newElements);
+    }, []);
+
+    return (
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        {elements.map((el) => (
+          <div
+            key={el.id}
+            className="absolute"
+            style={{
+              left: `${el.x}%`,
+              top: `${el.y}%`,
+              transform: `translate(-50%, -50%)`,
+            }}
+          >
+            <PerfectHeart
+              size={el.size}
+              color={el.color}
+              opacity={el.opacity}
+              rotate={el.rotate}
+              delay={el.delay}
+            />
+          </div>
+        ))}
+      </div>
+    );
+  };
+  // ─────────────────────────────────────────────────────────
+
   return (
     <>
       <SEO 
@@ -180,127 +294,166 @@ Exchanges are subject to product availability.`
         description={`Read our ${currentPolicy.title.toLowerCase()} for mamusca Nigeria.`}
       />
       
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-6xl mx-auto">
-          {/* Policy Navigation */}
-          <div className="mb-8">
-            <div className="flex flex-wrap gap-2 mb-6">
-              {Object.keys(policies).map((key) => (
-                <button
-                  key={key}
-                  onClick={() => setActivePolicy(key)}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    activePolicy === key
-                      ? 'bg-primary-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  {policies[key].title}
-                </button>
-              ))}
-            </div>
-          </div>
+      <div className="bg-black text-white antialiased min-h-screen relative overflow-hidden">
+        {/* ✦ PERFECT HEARTS – LEFT & RIGHT EDGES ONLY ✦ */}
+        <DecorativeElements />
 
-          {/* Policy Content */}
-          <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-            {/* Header */}
-            <div className="bg-gradient-to-r from-primary-600 to-luxury-rose text-white p-8">
-              <h1 className="text-3xl font-display font-bold mb-2">
-                {currentPolicy.title}
+        <div className="container mx-auto px-4 py-16 md:py-24 relative z-10">
+          <div className="max-w-6xl mx-auto">
+            
+            {/* Editorial Header */}
+            <header className="text-center mb-16 border-b border-white/5 pb-12">
+              
+              <h1 className="text-4xl md:text-5xl uppercase tracking-tighter font-light leading-none text-white">
+                Policies
               </h1>
-              <p className="text-primary-100">
-                Last Updated: {currentPolicy.lastUpdated}
-              </p>
-            </div>
+            </header>
 
-            {/* Content */}
-            <div className="p-8">
-              <div className="prose prose-lg max-w-none">
-                <p className="text-gray-600 mb-8">
-                  Welcome to mamusca Nigeria. This policy outlines our practices regarding 
-                  {activePolicy === 'privacy' && ' the collection, use, and protection of your personal information.'}
-                  {activePolicy === 'terms' && ' your use of our website and services.'}
-                  {activePolicy === 'refund' && ' our refund procedures and policies.'}
-                  {activePolicy === 'delivery' && ' our delivery services and timelines.'}
-                  {activePolicy === 'return' && ' our return and exchange procedures.'}
-                </p>
-
-                {currentPolicy.sections.map((section, index) => (
-                  <div key={index} className="mb-8">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                      {section.title}
-                    </h2>
-                    <div className="text-gray-600 whitespace-pre-line">
-                      {section.content}
-                    </div>
-                  </div>
+            {/* Policy Navigation – Minimal Pink Underline */}
+            <div className="mb-12 overflow-x-auto">
+              <div className="flex items-center space-x-8 md:space-x-12 pb-2 no-scrollbar">
+                {Object.keys(policies).map((key) => (
+                  <button
+                    key={key}
+                    onClick={() => setActivePolicy(key)}
+                    className={`uppercase tracking-[0.3em] text-[10px] whitespace-nowrap py-2 transition-colors relative ${
+                      activePolicy === key
+                        ? 'text-white font-medium after:content-[""] after:absolute after:bottom-0 after:left-0 after:w-full after:h-[1px] after:bg-pink-400'
+                        : 'text-neutral-500 hover:text-pink-300'
+                    }`}
+                  >
+                    {policies[key].title}
+                  </button>
                 ))}
-
-                {/* Contact Section */}
-                <div className="mt-12 pt-8 border-t">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                    Contact Us
-                  </h2>
-                  <p className="text-gray-600 mb-4">
-                    If you have any questions about this policy, please contact us:
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <p className="font-semibold text-gray-900">Email:</p>
-                      <p className="text-gray-600">{siteConfig.business.email}</p>
-                    </div>
-                    <div>
-                      <p className="font-semibold text-gray-900">Phone/WhatsApp:</p>
-                      <p className="text-gray-600">{siteConfig.business.phone}</p>
-                    </div>
-                    <div className="md:col-span-2">
-                      <p className="font-semibold text-gray-900">Address:</p>
-                      <p className="text-gray-600">{siteConfig.business.address}</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Acknowledgment */}
-                <div className="mt-8 p-6 bg-gray-50 rounded-lg">
-                  <p className="text-gray-600">
-                    By using our website and services, you acknowledge that you have read, 
-                    understood, and agree to be bound by this policy.
-                  </p>
-                </div>
               </div>
             </div>
-          </div>
 
-          {/* Quick Links */}
-          <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Link
-              to="/faq"
-              className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow text-center"
+            {/* Policy Content Card – Noir */}
+            <motion.div
+              key={activePolicy}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              className="bg-black/80 backdrop-blur-sm border border-white/5"
             >
-              <span className="text-2xl mb-2 block">❓</span>
-              <h3 className="font-semibold text-gray-900">FAQs</h3>
-              <p className="text-sm text-gray-600">Find quick answers</p>
-            </Link>
-            
-            <Link
-              to="/contact"
-              className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow text-center"
-            >
-              <span className="text-2xl mb-2 block">📞</span>
-              <h3 className="font-semibold text-gray-900">Contact Support</h3>
-              <p className="text-sm text-gray-600">Need help? Contact us</p>
-            </Link>
-            
-            <a
-              href={`https://wa.me/${siteConfig.business.whatsapp}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow text-center"
-            >
-              <span className="text-2xl mb-2 block">💬</span>
-              <h3 className="font-semibold text-gray-900">Live Chat</h3>
-              <p className="text-sm text-gray-600">Chat on WhatsApp</p>
-            </a>
+              {/* Header – Pink Accent */}
+              <div className="border-b border-white/5 p-8 md:p-12">
+                <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4">
+                  <div>
+                    <h2 className="text-3xl md:text-4xl font-light uppercase tracking-tighter text-white mb-2">
+                      {currentPolicy.title}
+                    </h2>
+                    <div className="flex items-center gap-3">
+                      <span className="w-6 h-[1px] bg-pink-400/50" />
+                      <span className="text-[9px] uppercase tracking-[0.4em] text-neutral-500">
+                        Last Updated: {currentPolicy.lastUpdated}
+                      </span>
+                    </div>
+                  </div>
+                  <span className="text-pink-400/60 text-[8px] uppercase tracking-[0.6em] font-serif italic">
+                    mamusca
+                  </span>
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="p-8 md:p-12">
+                <div className="prose prose-invert prose-sm max-w-none">
+                  <p className="text-neutral-400 text-xs uppercase tracking-[0.2em] leading-loose mb-12">
+                    {activePolicy === 'privacy' && 'The collection, use, and protection of your personal information.'}
+                    {activePolicy === 'terms' && 'Your use of our website and services.'}
+                    {activePolicy === 'refund' && 'Our refund procedures and policies.'}
+                    {activePolicy === 'delivery' && 'Our delivery services and timelines.'}
+                    {activePolicy === 'return' && 'Our return and exchange procedures.'}
+                  </p>
+
+                  {currentPolicy.sections.map((section, index) => (
+                    <div key={index} className="mb-12 last:mb-0">
+                      <h3 className="text-pink-400 text-[11px] uppercase tracking-[0.5em] font-medium mb-6 flex items-center">
+                        <span className="mr-4 text-white/40 font-serif italic text-sm">0{index + 1}</span>
+                        {section.title}
+                      </h3>
+                      <div className="text-[12px] text-neutral-300 leading-[2] uppercase tracking-[0.15em] whitespace-pre-line font-light">
+                        {section.content}
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* Contact Section – Noir */}
+                  <div className="mt-16 pt-12 border-t border-white/5">
+                    <h3 className="text-pink-400 text-[11px] uppercase tracking-[0.5em] font-medium mb-8 flex items-center">
+                      <span className="mr-4 text-white/40 font-serif italic text-sm">—</span>
+                      Contact Us
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      <div className="border border-white/5 p-6 bg-black/40">
+                        <p className="text-[8px] uppercase tracking-[0.4em] text-neutral-500 mb-2">Email</p>
+                        <p className="text-[11px] uppercase tracking-wider text-white/90">{siteConfig.business.email}</p>
+                      </div>
+                      <div className="border border-white/5 p-6 bg-black/40">
+                        <p className="text-[8px] uppercase tracking-[0.4em] text-neutral-500 mb-2">Phone/WhatsApp</p>
+                        <p className="text-[11px] uppercase tracking-wider text-white/90">{siteConfig.business.phone}</p>
+                      </div>
+                      <div className="md:col-span-2 border border-white/5 p-6 bg-black/40">
+                        <p className="text-[8px] uppercase tracking-[0.4em] text-neutral-500 mb-2">Address</p>
+                        <p className="text-[11px] uppercase tracking-wider text-white/90">{siteConfig.business.address}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Acknowledgment */}
+                  <div className="mt-12 p-8 border border-pink-400/20 bg-black/40">
+                    <div className="flex items-start gap-4">
+                      <span className="text-pink-400 text-xl font-serif italic">“</span>
+                      <p className="text-[10px] uppercase tracking-[0.3em] text-neutral-400 leading-relaxed">
+                        By using our website and services, you acknowledge that you have read, 
+                        understood, and agree to be bound by this policy.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Quick Links – Noir Cards with Magnetic Buttons */}
+            <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Link
+                to="/faq"
+                className="group relative p-8 border border-white/5 bg-black/60 hover:border-pink-400/30 transition-all duration-500 text-center"
+              >
+                <h3 className="text-[10px] uppercase tracking-[0.4em] font-bold text-white mb-2">FAQs</h3>
+                <p className="text-[8px] uppercase tracking-[0.3em] text-neutral-500">Find quick answers</p>
+                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-8 h-[1px] bg-pink-400/0 group-hover:bg-pink-400/50 transition-all duration-500" />
+              </Link>
+              
+              <Link
+                to="/contact"
+                className="group relative p-8 border border-white/5 bg-black/60 hover:border-pink-400/30 transition-all duration-500 text-center"
+              >
+                <h3 className="text-[10px] uppercase tracking-[0.4em] font-bold text-white mb-2">Contact Support</h3>
+                <p className="text-[8px] uppercase tracking-[0.3em] text-neutral-500">Need help? Contact us</p>
+                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-8 h-[1px] bg-pink-400/0 group-hover:bg-pink-400/50 transition-all duration-500" />
+              </Link>
+              
+              <a
+                href={`https://wa.me/${siteConfig.business.whatsapp}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group relative p-8 border border-white/5 bg-black/60 hover:border-pink-400/30 transition-all duration-500 text-center"
+              >
+                <h3 className="text-[10px] uppercase tracking-[0.4em] font-bold text-white mb-2">Live Chat</h3>
+                <p className="text-[8px] uppercase tracking-[0.3em] text-neutral-500">Chat on WhatsApp</p>
+                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-8 h-[1px] bg-pink-400/0 group-hover:bg-pink-400/50 transition-all duration-500" />
+              </a>
+            </div>
+
+            {/* Footer Branding */}
+            <footer className="mt-20 pt-12 border-t border-white/5 text-center">
+              <div className="w-10 h-[1px] bg-pink-500/30 mx-auto mb-8" />
+              <p className="text-[9px] uppercase tracking-[0.6em] text-neutral-600">
+                {siteConfig.brandName} — Legal Archive
+              </p>
+            </footer>
           </div>
         </div>
       </div>

@@ -449,7 +449,7 @@ const Home = () => {
               transition={{ delay: 0.4 }}
               className="text-neutral-400 text-lg leading-relaxed font-light"
             >
-              True luxury isn't found in a warehouse. It's found in the meticulous alignment of every strand — the hand‑finished lace that disappears against the skin.
+              True luxury isn't found in a warehouse. It's found in the meticulous alignment of every strand the hand finished lace that disappears against the skin.
             </motion.p>
             <Link
               to="/about"
